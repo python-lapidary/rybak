@@ -24,8 +24,8 @@ class Renderer:
             self,
             template_root: Path,
             target_root: Path,
-            template_path: Path,
-            target_path: Path,
+            template_path: Path = Path(),
+            target_path: Path = Path(),
     ) -> None:
         if not template_root.exists():
             raise TypeError('template_root must exist and be a directory', template_root)
@@ -66,7 +66,7 @@ class Renderer:
 
         for item in items:
             target_name = mako.template.Template(text=file_name).render(**data, loop_over=lambda _: item)
-            self._render_dir(file_name, target_name, dict(**data, item=item))
+            self._render_dir(file_name, target_name, {**data, 'item': item})
 
     def _render_dir(self, template_name: str, target_name: str, data: dict[str, Any]):
         """Make sure output directory exists and render all children of the template (sub)directory"""
@@ -95,7 +95,7 @@ class Renderer:
 
         for item in items:
             target_name = mako.template.Template(text=template_name).render(**data, loop_over=lambda _: item)
-            self._render_file(template_name, target_name, dict(**data, item=item))
+            self._render_file(template_name, target_name, {**data, 'item': item})
 
     def _render_file(self, template_name: str, target_name: str, data: dict[str, Any]) -> None:
         logger.debug('Render to file %s', self._target_path / target_name)
