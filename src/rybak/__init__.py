@@ -1,31 +1,22 @@
-from collections.abc import Callable, Iterable, Iterator
+from collections.abc import Iterable
 import logging
 from pathlib import Path
 from typing import Any
 
 import mako.template
-import more_itertools as it2
 
 logger = logging.getLogger(__name__)
 
 
 class LoopContext(Exception):
-    def __init__(self, it: Iterator[tuple[str, Any]]) -> None:
-        self.iter = it
+    def __init__(self, items: Iterable) -> None:
+        self.items = items
 
 
-def mk_loop_over() -> Callable[[Iterable[tuple[str, Any]]], str]:
-    it: it2.peekable | None = None
-
-    def loop_over(items: Iterable[tuple[str, Any]]) -> str:
-        nonlocal it
-        if it is None:
-            it = it2.peekable(items)
-            raise LoopContext(it)
-
-        return it.peek()[0]
-
-    return loop_over
+def loop_over(items: Iterable) -> None:
+    if not isinstance(items, Iterable):
+        raise TypeError('items must be an Iterable')
+    raise LoopContext(items)
 
 
 class Renderer:
@@ -64,18 +55,18 @@ class Renderer:
         """Create one or more directories from a single template (sub)directory"""
         template_path = self._template_path / file_name
         logger.debug('Render from dir %s', template_path)
-        loop_over = mk_loop_over()
+
         try:
             target_name = mako.template.Template(text=file_name).render(**data, loop_over=loop_over)
             self._render_dir(file_name, target_name, data)
         except LoopContext as loop:
-            try:
-                while True:
-                    name, item = next(loop.iter)
-                    target_name = mako.template.Template(text=file_name).render(**data, loop_over=loop_over)
-                    self._render_dir(file_name, target_name, dict(**data, item=item))
-            except StopIteration:
-                pass
+            items = loop.items
+        else:
+            items = ()
+
+        for item in items:
+            target_name = mako.template.Template(text=file_name).render(**data, loop_over=lambda _: item)
+            self._render_dir(file_name, target_name, dict(**data, item=item))
 
     def _render_dir(self, template_name: str, target_name: str, data: dict[str, Any]):
         """Make sure output directory exists and render all children of the template (sub)directory"""
@@ -94,18 +85,17 @@ class Renderer:
         template_path = self._template_path / template_name
         logger.debug('Render from file %s', template_path)
 
-        loop_over = mk_loop_over()
         try:
             target_name = mako.template.Template(text=template_name).render(**data, loop_over=loop_over)
             self._render_file(template_name, target_name, data)
         except LoopContext as loop:
-            try:
-                while True:
-                    name, item = next(loop.iter)
-                    target_name = mako.template.Template(text=template_name).render(**data, loop_over=loop_over)
-                    self._render_file(template_name, target_name, dict(**data, loop_over=loop_over, item=item))
-            except StopIteration:
-                pass
+            items = loop.items
+        else:
+            items = ()
+
+        for item in items:
+            target_name = mako.template.Template(text=template_name).render(**data, loop_over=lambda _: item)
+            self._render_file(template_name, target_name, dict(**data, item=item))
 
     def _render_file(self, template_name: str, target_name: str, data: dict[str, Any]) -> None:
         logger.debug('Render to file %s', self._target_path / target_name)
