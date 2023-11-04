@@ -2,20 +2,24 @@ from pathlib import Path
 
 
 def cmp_dirs(expected: Path, actual: Path) -> None:
-    expected_children = set(expected.iterdir())
-    actual_children = set(expected.iterdir())
+    expected_children = set(path.name for path in expected.iterdir())
+    actual_children = set(path.name for path in actual.iterdir())
 
-    assert actual_children == expected_children
+    assert actual_children == expected_children, ', '.join(str(p) for p in actual_children)
 
     for name in expected_children:
-        if (expected / name).is_dir():
-            assert (actual / name).is_dir()
+        expected_path = (expected / name)
+        actual_path = (actual / name)
+        if expected_path.is_dir():
+            assert actual_path.is_dir(), f'Expected {actual_path} to be a directory'
 
-            cmp_dirs(expected / name, actual / name)
-        elif (expected / name).is_file():
-            assert (actual / name).is_file()
+            cmp_dirs(expected_path, actual_path)
+        elif expected_path.is_file():
+            assert actual_path.is_file(), actual_path
 
-            expected_text = (expected / name).read_text()
-            actual_text = (actual / name).read_text()
+            expected_text = expected_path.read_text()
+            actual_text = actual_path.read_text()
 
-            assert expected_text == actual_text
+            assert expected_text == actual_text, f'{actual_path}: {actual_text}'
+        else:
+            raise TypeError('Neither a file nor a directory', expected_path)

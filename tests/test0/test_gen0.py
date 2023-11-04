@@ -20,13 +20,11 @@ def test_gen():
         Renderer(
             test_root / 'template',
             target_root,
-            Path(),
-            Path(),
         ).render(dict(
             tmpl_dir='target_dir',
-            tmpl_file1='file.txt',
-            tmpl_file2='file.txt',
-            tmpl_file3='subdir/file.txt',
+            tmpl_file1='file1.txt',
+            tmpl_file2='file2.txt',
+            tmpl_file3='subdir/file3.txt',
             content1='foo',
             content2='bar',
             content3='baz',

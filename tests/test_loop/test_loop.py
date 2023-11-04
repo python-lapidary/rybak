@@ -20,12 +20,7 @@ def test_gen():
         Renderer(
             test_root / 'template',
             target_root,
-            Path(),
-            Path(),
         ).render(dict(
-            filename='hello',
-            data=(1, 2, 3),
-            dirname='dir',
             animals=dict(
                 cat='meows',
                 dog='barks'
