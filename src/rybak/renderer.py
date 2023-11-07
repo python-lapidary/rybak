@@ -8,6 +8,10 @@ from ._types import TemplateData
 
 class Renderer(abc.ABC):
     @abc.abstractmethod
+    def __init__(self, **kwargs) -> None:
+        pass
+
+    @abc.abstractmethod
     def render_str(self, template: str, data: TemplateData) -> str:
         pass
 

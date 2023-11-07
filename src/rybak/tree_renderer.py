@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from functools import cached_property
 import logging
 from pathlib import Path
@@ -18,6 +19,8 @@ class TreeRenderer:
             renderer: Renderer,
             template_path: Path = Path(),
             target_path: Path = Path(),
+            *,
+            excluded: Iterable[Path] = (),
     ) -> None:
         if not template_root.exists():
             raise TypeError('template_root must exist and be a directory', template_root)
@@ -28,6 +31,7 @@ class TreeRenderer:
         self._template_root = template_root
         self._target_root = target_root
         self._renderer = renderer
+        self._excluded = excluded
 
         self._template_path = template_path
         self._target_path = target_path
@@ -39,7 +43,12 @@ class TreeRenderer:
     def _render(self, file_name: str, data) -> None:
         """Dispatcher method that calls another render method depending on whether the path is a directory or a file"""
 
-        path = (self._template_root / file_name).absolute()
+        rel_path = (self._template_path / file_name)
+        if rel_path in self._excluded:
+            logger.debug('Excluded %s', rel_path)
+            return
+
+        path = self._template_root/rel_path
         if path.is_dir():
             self._render_all_dirs(file_name, data)
         else:
@@ -119,7 +128,8 @@ class TreeRenderer:
             self._target_root,
             self._renderer,
             self._template_path / template_name,
-            self._target_path / target_name
+            self._target_path / target_name,
+            excluded=self._excluded,
         )
 
     @cached_property

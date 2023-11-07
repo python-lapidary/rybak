@@ -3,9 +3,12 @@ from pathlib import Path
 import sys
 import tempfile
 
+import jinja2
+
 from compare import cmp_dirs
 from rybak import render
-from rybak.mako import MakoRenderer
+from rybak.jinja import JinjaRenderer
+from rybak.tornado import TornadoRenderer
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -19,9 +22,9 @@ def test_gen():
         test_root = Path(__file__).parent
         target_root = Path(tmp)
         render(
-            test_root / 'template',
+            test_root/'template' ,
             target_root,
-            MakoRenderer,
+            JinjaRenderer(jinja2.Environment(loader=jinja2.loaders.FileSystemLoader(test_root/'template'))),
             dict(
                 tmpl_dir='target_dir',
                 tmpl_file1='file1.txt',
@@ -32,10 +35,8 @@ def test_gen():
                 content3='baz',
             ),
             excluded=(
-                Path('excluded_file.txt'),
-                Path('${tmpl_dir}/excluded_file.txt'),
-            ),
-            renderer_args={},
+                Path('__pycache__'),
+            )
         )
 
         cmp_dirs(test_root / 'output', target_root)
