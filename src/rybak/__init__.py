@@ -1,121 +1,15 @@
-from collections.abc import Iterable
-import logging
+__all__ = [
+    'render',
+    'TreeRenderer',
+]
+
 from pathlib import Path
-from typing import Any
 
-import mako.template
-
-logger = logging.getLogger(__name__)
-
-
-class LoopContext(Exception):
-    def __init__(self, items: Iterable) -> None:
-        self.items = items
+from ._types import TemplateData
+from .loop import LoopContext, loop_over
+from .renderer import RendererFactory
+from .tree_renderer import TreeRenderer
 
 
-def loop_over(items: Iterable) -> None:
-    if not isinstance(items, Iterable):
-        raise TypeError('items must be an Iterable')
-    raise LoopContext(items)
-
-
-class Renderer:
-    def __init__(
-            self,
-            template_root: Path,
-            target_root: Path,
-            template_path: Path = Path(),
-            target_path: Path = Path(),
-    ) -> None:
-        if not template_root.exists():
-            raise TypeError('template_root must exist and be a directory', template_root)
-
-        if not template_root.is_dir():
-            raise TypeError('template_root must be a directory', template_root)
-
-        self._template_root = template_root
-        self._target_root = target_root
-        self._template_path = template_path
-        self._target_path = target_path
-
-    def render(self, data: Any):
-        for child in self._full_template_path.iterdir():
-            self._render(child.name, data)
-
-    def _render(self, file_name: str, data) -> None:
-        """Dispatcher method that calls another render method depending on whether the path is a directory or a file"""
-
-        path = (self._template_root / file_name).absolute()
-        if path.is_dir():
-            self._render_all_dirs(file_name, data)
-        else:
-            self._render_all_files(file_name, data)
-
-    def _render_all_dirs(self, file_name: str, data: Any):
-        """Create one or more directories from a single template (sub)directory"""
-        template_path = self._template_path / file_name
-        logger.debug('Render from dir %s', template_path)
-
-        try:
-            target_name = mako.template.Template(text=file_name).render(**data, loop_over=loop_over)
-            self._render_dir(file_name, target_name, data)
-        except LoopContext as loop:
-            items = loop.items
-        else:
-            items = ()
-
-        for item in items:
-            target_name = mako.template.Template(text=file_name).render(**data, loop_over=lambda _: item)
-            self._render_dir(file_name, target_name, {**data, 'item': item})
-
-    def _render_dir(self, template_name: str, target_name: str, data: dict[str, Any]):
-        """Make sure output directory exists and render all children of the template (sub)directory"""
-        logger.debug('Render to dir %s', self._target_path / target_name)
-
-        target_path = self._full_target_path / target_name
-
-        if target_path.exists() and not target_path.is_dir():
-            target_path.unlink()
-        target_path.mkdir(exist_ok=True)
-
-        self._with_subdir(template_name, target_name).render(data)
-
-    def _render_all_files(self, template_name: str, data: dict[str, Any]):
-        """Render one or more files from a single template file"""
-        template_path = self._template_path / template_name
-        logger.debug('Render from file %s', template_path)
-
-        try:
-            target_name = mako.template.Template(text=template_name).render(**data, loop_over=loop_over)
-            self._render_file(template_name, target_name, data)
-        except LoopContext as loop:
-            items = loop.items
-        else:
-            items = ()
-
-        for item in items:
-            target_name = mako.template.Template(text=template_name).render(**data, loop_over=lambda _: item)
-            self._render_file(template_name, target_name, {**data, 'item': item})
-
-    def _render_file(self, template_name: str, target_name: str, data: dict[str, Any]) -> None:
-        logger.debug('Render to file %s', self._target_path / target_name)
-        text = mako.template.Template(filename=str(self._full_template_path / template_name)).render(**data)
-        target_path = (self._full_target_path / target_name)
-        target_path.parent.mkdir(parents=True, exist_ok=True)
-        target_path.write_text(text)
-
-    def _with_subdir(self, template_name, target_name: str) -> 'Renderer':
-        return Renderer(
-            self._template_root,
-            self._target_root,
-            self._template_path / template_name,
-            self._target_path / target_name
-        )
-
-    @property
-    def _full_template_path(self):
-        return self._template_root / self._template_path
-
-    @property
-    def _full_target_path(self):
-        return self._target_root / self._target_path
+def render(template_root: Path, target_root: Path, renderer_factory: RendererFactory, data: TemplateData) -> None:
+    TreeRenderer(template_root, target_root, renderer_factory(template_root)).render(data)

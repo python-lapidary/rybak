@@ -3,8 +3,9 @@ from pathlib import Path
 import sys
 import tempfile
 
-from rybak import Renderer
 from compare import cmp_dirs
+from rybak import render
+from rybak.tornado import TornadoRenderer
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -17,13 +18,19 @@ def test_gen():
     with tempfile.TemporaryDirectory() as tmp:
         test_root = Path(__file__).parent
         target_root = Path(tmp)
-        Renderer(
+        render(
             test_root / 'template',
             target_root,
-        ).render(dict(
-            animals=dict(
-                cat='meows',
-                dog='barks'
-            ))
+            TornadoRenderer,
+            dict(
+                tmpl_dir='target_dir',
+                tmpl_file1='file1.txt',
+                tmpl_file2='file2.txt',
+                tmpl_file3='subdir/file3.txt',
+                content1='foo',
+                content2='bar',
+                content3='baz',
+            )
         )
+
         cmp_dirs(test_root / 'output', target_root)
