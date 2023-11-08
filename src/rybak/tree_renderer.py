@@ -64,6 +64,8 @@ class TreeRenderer:
                 **data,
                 'loop_over': loop_over,
             })
+            if not target_name:
+                logger.info('Skipping, template evaluated to empty value')
             self._render_dir(file_name, target_name, data)
         except LoopContext as loop:
             items = loop.items
@@ -99,6 +101,9 @@ class TreeRenderer:
                 **data,
                 'loop_over': loop_over,
             })
+            if not target_name:
+                logger.info('Skipping, template evaluated to empty value')
+                return
             self._render_file(template_name, target_name, data)
         except LoopContext as loop:
             items = loop.items
