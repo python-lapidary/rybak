@@ -1,3 +1,4 @@
+from importlib.resources.abc import Traversable
 from pathlib import Path
 
 import jinja2
@@ -14,7 +15,7 @@ class JinjaRenderer(Renderer):
         env = self._env.overlay()
         env.globals['loop_over'] = loop_over
 
-    def render_file(self, template_file: Path, target_file: Path, data: TemplateData) -> None:
         return env.from_string(template).render(**data)
 
+    def render_file(self, template_file: Traversable, target_file: Path, data: TemplateData) -> None:
         target_file.write_text(self._env.get_template(str(template_file)).render(**data))

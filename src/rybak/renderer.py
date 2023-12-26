@@ -1,5 +1,6 @@
 import abc
 from collections.abc import Callable
+from importlib.resources.abc import Traversable
 from pathlib import Path
 from typing import TypeAlias
 
@@ -16,7 +17,7 @@ class Renderer(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def render_file(self, template_file: Path, target_file: Path, data: TemplateData) -> None:
+    def render_file(self, template_file: Traversable, target_file: Path, data: TemplateData) -> None:
         pass
 
 

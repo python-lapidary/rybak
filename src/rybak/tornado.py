@@ -3,6 +3,7 @@ __all__ = [
 ]
 
 import functools
+from importlib.resources.abc import Traversable
 from pathlib import Path
 
 import tornado.template
@@ -19,7 +20,7 @@ class TornadoRenderer(Renderer):
         template = self.str_template(template)
         return template.generate(**data, loop_over=loop_over).decode('UTF-8')
 
-    def render_file(self, template_path: Path, target_file: Path, data: TemplateData) -> None:
+    def render_file(self, template_path: Traversable, target_file: Path, data: TemplateData) -> None:
         template = self._loader.load(str(template_path))
         text = template.generate(**data)
         target_file.write_bytes(text)

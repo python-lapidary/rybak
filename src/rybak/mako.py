@@ -3,6 +3,7 @@ __all__ = [
 ]
 
 import functools
+from importlib.resources.abc import Traversable
 from pathlib import Path
 
 import mako.template
@@ -20,7 +21,7 @@ class MakoRenderer(Renderer):
         template = self.str_template(template)
         return template.render(**data, loop_over=loop_over)
 
-    def render_file(self, template_path: Path, target_file: Path, data: TemplateData) -> None:
+    def render_file(self, template_path: Traversable, target_file: Path, data: TemplateData) -> None:
         template = self._loader.get_template(str(template_path))
         text = template.render(**data)
         target_file.write_text(text)
