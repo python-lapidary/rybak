@@ -17,16 +17,16 @@ from .tree_renderer import TreeRenderer
 def render(
         template_root: Traversable,
         target_root: Path,
-        renderer: type[Renderer] | Renderer,
+        renderer_: type[Renderer] | Renderer,
         data: TemplateData,
         *,
         renderer_args: dict[str, Any] | None = None,
         excluded: Iterable[Path] = (),
 ) -> None:
     actual_renderer = (
-        renderer
-        if isinstance(renderer, Renderer)
-        else renderer(template_root=template_root, **renderer_args if renderer_args else {})
+        renderer_
+        if isinstance(renderer_, Renderer)
+        else renderer_(template_root=template_root, **renderer_args if renderer_args else {})
     )
 
     TreeRenderer(
