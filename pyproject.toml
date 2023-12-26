@@ -1,34 +1,25 @@
 [tool.poetry]
 name = "rybak"
 version = "0.1.0"
-description = "Project generator leveraging Mako Templates"
+description = "Project generator"
 authors = ["Raphael Krupinski <10319569-mattesilver@users.noreply.gitlab.com>"]
 readme = "README.md"
 packages = [{ include = "rybak", from = "src" }]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
+mako = { version = "^1.2.4", optional = true }
+tornado = { version = "^6.3.3", optional = true }
+jinja2 = { version = "^3.1.2", optional = true }
+
+[tool.poetry.extras]
+mako = ['mako']
+jinja = ['jinja2']
+tornado = ['tornado']
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"
 
-[tool.poetry.group.mako]
-optional = true
-
-[tool.poetry.group.mako.dependencies]
-mako = "^1.2.4"
-
-[tool.poetry.group.tornado]
-optional = true
-
-[tool.poetry.group.tornado.dependencies]
-tornado = "^6.3.3"
-
-[tool.poetry.group.jinja]
-optional = true
-
-[tool.poetry.group.jinja.dependencies]
-jinja2 = "^3.1.2"
 
 [build-system]
 requires = ["poetry-core"]
