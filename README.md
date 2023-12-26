@@ -41,7 +41,11 @@ render(
     Path('template_root'),
     Path('target_root'),
     JinjaRenderer(Environment()),
-    {},
+    {'likes': {
+        'Alice': 'Bob',
+        'Bob': 'Charlie',
+        'Charlie': 'cats',
+    }},
 )
 ```
 
@@ -97,12 +101,19 @@ Similarly, `{{items}}` would produce the same key-value pair, and [1] accesses t
 Alternatively, the model could be a list of complex objects:
 
 model:
+
 ```python
 likes = [
-  {'name': 'Alice', 'likes': 'Bob'},
-  {'name': 'Bob', 'likes': 'Charlie'},
-  {'name': 'Charlie', 'likes': 'cats'},
+    {'name': 'Alice', 'likes': 'Bob'},
+    {'name': 'Bob', 'likes': 'Charlie'},
+    {'name': 'Charlie', 'likes': 'cats'},
 ]
 ```
 
 In this case the file name template simplifies to `{{loop_over(likes).name}}` and the content template to `{{item.likes}}`.
+
+## Installation
+
+Rybak templates can work with either of Jinja, Mako or Torado; so typically you need to install Rybak and one of those libraries.
+
+installing `rybak[jinja]`, `rybak[mako]` or `rybak[tornado]` will handle this.
