@@ -4,6 +4,7 @@ __all__ = [
 ]
 
 from collections.abc import Iterable
+from importlib.abc import Traversable
 from pathlib import Path
 from typing import Any
 
@@ -14,7 +15,7 @@ from .tree_renderer import TreeRenderer
 
 
 def render(
-        template_root: Path,
+        template_root: Traversable,
         target_root: Path,
         renderer: type[Renderer] | Renderer,
         data: TemplateData,
