@@ -3,7 +3,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TypeAlias
 
-from ._types import TemplateData
+from ._types import LoopOverFn, TemplateData
 
 
 class Renderer(abc.ABC):
@@ -12,7 +12,7 @@ class Renderer(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def render_str(self, template: str, data: TemplateData) -> str:
+    def render_str(self, template: str, data: TemplateData, loop_over: LoopOverFn) -> str:
         pass
 
     @abc.abstractmethod

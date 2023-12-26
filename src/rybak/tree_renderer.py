@@ -62,8 +62,7 @@ class TreeRenderer:
         try:
             target_name = self._renderer.render_str(file_name, {
                 **data,
-                'loop_over': loop_over,
-            })
+            }, loop_over)
             if not target_name:
                 logger.info('Skipping, template evaluated to empty value')
             self._render_dir(file_name, target_name, data)
@@ -75,8 +74,7 @@ class TreeRenderer:
         for item in items:
             target_name = self._renderer.render_str(file_name, {
                 **data,
-                'loop_over': lambda _: item,
-            })
+            }, lambda _: item, )
             self._render_dir(file_name, target_name, {**data, 'item': item})
 
     def _render_dir(self, template_name: str, target_name: str, data: dict[str, Any]):
@@ -99,8 +97,7 @@ class TreeRenderer:
         try:
             target_name = self._renderer.render_str(template_name, {
                 **data,
-                'loop_over': loop_over,
-            })
+            }, loop_over)
             if not target_name:
                 logger.info('Skipping, template evaluated to empty value')
                 return
@@ -113,8 +110,7 @@ class TreeRenderer:
         for item in items:
             target_name = self._renderer.render_str(template_name, {
                 **data,
-                'loop_over': lambda _: item,
-            })
+            }, lambda _: item, )
             self._render_file(template_name, target_name, {**data, 'item': item})
 
     def _render_file(self, template_name: str, target_name: str, data: TemplateData) -> None:
