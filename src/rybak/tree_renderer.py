@@ -2,12 +2,12 @@ import dataclasses
 import logging
 import os.path
 from functools import cached_property
-from importlib.abc import Traversable
 from pathlib import Path
-from typing import Iterable, Never
+from typing import Iterable, NoReturn
 
 from ._types import LoopOverFn, RenderFn, TemplateData
 from .adapter import RendererAdapter
+from .pycompat import Traversable
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class StartIteration(Exception):  # noqa: N818
         self.items = items
 
 
-def loop_over(items: Iterable) -> Never:
+def loop_over(items: Iterable) -> NoReturn:
     if isinstance(items, str):
         raise TypeError('Expected an Iterable other than str')
     if not isinstance(items, Iterable):
@@ -44,7 +44,7 @@ class RenderContext:
 
 
 class TreeRenderer:
-    def __init__(self, context: RenderContext, template_path: Traversable, target_path: Path) -> None:
+    def __init__(self, context: RenderContext, template_path: Path, target_path: Path) -> None:
         self._context = context
         self._template_path = template_path
         self._target_path = target_path

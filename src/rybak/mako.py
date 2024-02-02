@@ -3,23 +3,24 @@ __all__ = [
 ]
 
 import functools
-from importlib.resources.abc import Traversable
 from pathlib import Path
+from typing import Optional
 
 import mako.lookup
 import mako.template
 
 from ._types import LoopOverFn, TemplateData
 from .adapter import RendererAdapter
+from .pycompat import Traversable
 
 
 class MakoAdapter(RendererAdapter):
     def __init__(self, template_root: Path) -> None:
         self._loader = mako.lookup.TemplateLookup((template_root,))
 
-    def render_str(self, template: str, data: TemplateData, loop_over: LoopOverFn | None = None) -> str:
-        template = str_template(template)
-        return template.render(**data, loop_over=loop_over)
+    def render_str(self, template: str, data: TemplateData, loop_over: Optional[LoopOverFn] = None) -> str:
+        template_obj = str_template(template)
+        return template_obj.render(**data, loop_over=loop_over)
 
     def render_file(self, template_path: Traversable, target_file: Path, data: TemplateData) -> None:
         template = self._loader.get_template(str(template_path))

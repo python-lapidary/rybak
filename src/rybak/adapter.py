@@ -1,9 +1,9 @@
 import abc
-from importlib.resources.abc import Traversable
 from pathlib import Path
 from typing import Any
 
 from ._types import LoopOverFn, TemplateData
+from .pycompat import Traversable
 
 
 class RendererAdapter(abc.ABC):

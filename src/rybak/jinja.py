@@ -1,4 +1,3 @@
-from importlib.resources.abc import Traversable
 from pathlib import Path
 from typing import Any, Optional
 
@@ -6,6 +5,7 @@ import jinja2
 
 from ._types import LoopOverFn, TemplateData
 from .adapter import RendererAdapter
+from .pycompat import Traversable
 
 
 class JinjaAdapter(RendererAdapter):
@@ -19,7 +19,7 @@ class JinjaAdapter(RendererAdapter):
             **env_kwargs,
         )
 
-    def render_str(self, template: str, data: TemplateData, loop_over: LoopOverFn | None = None) -> str:
+    def render_str(self, template: str, data: TemplateData, loop_over: Optional[LoopOverFn] = None) -> str:
         env = self._env.overlay()
         env.globals['loop_over'] = loop_over
 

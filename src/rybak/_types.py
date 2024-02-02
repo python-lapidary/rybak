@@ -1,4 +1,6 @@
-from typing import Any, Callable, Iterable, Mapping, TypeAlias, TypeVar
+from typing import Any, Callable, Iterable, Mapping, TypeVar
+
+from .pycompat import TypeAlias
 
 TemplateData: TypeAlias = Mapping[str, Any]
 

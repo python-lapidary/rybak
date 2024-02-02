@@ -3,23 +3,22 @@ __all__ = [
     'render',
 ]
 
-from collections.abc import Iterable
-from importlib.abc import Traversable
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable, Mapping, Optional, Type, Union
 
 from ._types import TemplateData
 from .adapter import RendererAdapter
+from .pycompat import Traversable
 from .tree_renderer import RenderContext, TreeRenderer
 
 
 def render(
     template_root: Traversable,
     target_root: Path,
-    adapter: type[RendererAdapter] | RendererAdapter,
+    adapter: Union[Type[RendererAdapter], RendererAdapter],
     data: TemplateData,
     *,
-    renderer_args: dict[str, Any] | None = None,
+    renderer_args: Optional[Mapping[str, Any]] = None,
     excluded: Iterable[Path] = (),
     remove_suffixes: Iterable[str] = (),
 ) -> None:
