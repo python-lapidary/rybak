@@ -5,7 +5,6 @@ import jinja2
 
 from ._types import LoopOverFn, RenderError, TemplateData
 from .adapter import RendererAdapter
-from .pycompat import Traversable
 
 
 class JinjaAdapter(RendererAdapter):
@@ -29,8 +28,8 @@ class JinjaAdapter(RendererAdapter):
         except jinja2.TemplateError as e:
             raise RenderError from e
 
-    def render_file(self, template_file: Traversable, target_file: Path, data: TemplateData) -> None:
-        template_obj = self._env.get_template(str(template_file))
+    def render_file(self, template_path: Path, target_file: Path, data: TemplateData) -> None:
+        template_obj = self._env.get_template(template_path.as_posix())
         try:
             text = template_obj.render(**data)
         except jinja2.TemplateError as e:
