@@ -6,7 +6,7 @@ import os.path
 from pathlib import Path
 from typing import Any
 
-from ._types import TemplateData, LoopOverFn
+from ._types import TemplateData, LoopOverFn, RenderFn
 from .loop import LoopContext, loop_over
 from .renderer import Renderer
 
@@ -51,30 +51,35 @@ class TreeRenderer:
 
         path = self._template_root / str(rel_path)
         if path.is_dir():
-            self._render_all_dirs(file_name, data)
+            render_single = self._render_dir
         else:
-            self._render_all_files(file_name, data)
+            render_single = self._render_file
 
-    def _render_all_dirs(self, file_name: str, data: Any):
-        """Create one or more directories from a single template (sub)directory"""
-        template_path = self._template_path / file_name
-        logger.debug('Render from dir %s', template_path)
+        self._render_all(file_name, data, render_single)
+
+    def _render_all(self, template_name: str, data: TemplateData, render_single: RenderFn):
+        template_path = self._template_path / template_name
+        logger.debug('Render from %s', template_path)
 
         try:
-            target_name = self._render_file_name(file_name, data, loop_over)
+            target_name = self._render_file_name(template_name, data, loop_over)
             if not target_name:
                 logger.info('Skipping, template evaluated to empty value')
-            self._render_dir(file_name, target_name, data)
+                return
+            render_single(template_name, target_name, data)
         except LoopContext as loop:
             items = loop.items
         else:
             items = ()
 
         for item in items:
-            target_name = self._render_file_name(file_name, data, lambda _: item)
-            self._render_dir(file_name, target_name, {**data, 'item': item})
+            target_name = self._render_file_name(template_name, data, lambda _: item)
+            if not target_name:
+                logger.info('Skipping, template evaluated to empty value')
+                continue
+            render_single(template_name, target_name, {**data, 'item': item})
 
-    def _render_dir(self, template_name: str, target_name: str, data: dict[str, Any]):
+    def _render_dir(self, template_name: str, target_name: str, data: TemplateData):
         """Make sure output directory exists and render all children of the template (sub)directory"""
         logger.debug('Render to dir %s', self._target_path / target_name)
 
@@ -86,36 +91,16 @@ class TreeRenderer:
 
         self._with_subdir(template_name, target_name).render(data)
 
-    def _render_all_files(self, template_name: str, data: TemplateData):
-        """Render one or more files from a single template file"""
-        template_path = self._template_path / template_name
-        logger.debug('Render from file %s', template_path)
-
-        try:
-            target_name = self._render_file_name(template_name, data, loop_over)
-            if not target_name:
-                logger.info('Skipping, template evaluated to empty value')
-                return
-            self._render_file(template_name, target_name, data)
-        except LoopContext as loop:
-            items = loop.items
-        else:
-            items = ()
-
-        for item in items:
-            target_name = self._render_file_name(template_name, data, lambda _: item)
-            self._render_file(template_name, target_name, {**data, 'item': item})
-
     def _render_file_name(self, template: str, data: TemplateData, loop_over_: LoopOverFn) -> str:
+        if self._remove_suffixes:
+            root, ext = os.path.splitext(template)
+            if ext in self._remove_suffixes:
+                template = root
         target_name = self._renderer.render_str(
             template,
             data,
             loop_over_,
         )
-        if self._remove_suffixes:
-            root, ext = os.path.splitext(target_name)
-            if ext in self._remove_suffixes:
-                return root
         return target_name
 
     def _render_file(self, template_name: str, target_name: str, data: TemplateData) -> None:

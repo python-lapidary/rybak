@@ -18,10 +18,12 @@ def test_gen():
             target_root,
             JinjaRenderer(jinja2.Environment(loader=jinja2.loaders.FileSystemLoader(test_root / 'template'))),
             dict(
-                animals=dict(
-                    cat='meows',
-                    dog='barks'
-                )
-            )
+                animals={
+                    'cat': 'meows',
+                    'dog': 'barks',
+                    '':'is silent',
+                }
+            ),
+            remove_suffixes=('.jinja',)
         )
         cmp_dirs(test_root / 'output', target_root)

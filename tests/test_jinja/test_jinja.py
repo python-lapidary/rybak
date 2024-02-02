@@ -32,6 +32,8 @@ def test_gen():
                 content1='foo',
                 content2='bar',
                 content3='baz',
+                empty_directory_name='',
+                empty_file_name='',
             ),
             excluded=(
                 Path('__pycache__'),
