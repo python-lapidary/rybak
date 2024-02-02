@@ -23,6 +23,6 @@ def test_gen():
                     '': 'is silent',
                 }
             ),
-            remove_suffixes=('.jinja',)
+            remove_suffixes=('.jinja',),
         )
         cmp_dirs(test_root / 'output', target_root)

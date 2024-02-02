@@ -14,10 +14,10 @@ repos:
   - id: ruff
     name: ruff check
     pass_filenames: false
-#  - id: ruff-format
-#    pass_filenames: false
-#    args:
-#    - --check
+  - id: ruff-format
+    pass_filenames: false
+    args:
+    - --check
 #- repo: local
 #  hooks:
 #  - id: mypy

@@ -25,8 +25,9 @@ class Test0(unittest.TestCase):
                         dogs=dict(
                             Pluto='golden',
                             Goofy='black',
-                        )
-                    ))
+                        ),
+                    )
+                ),
             )
             cmp_dirs(test_root / 'output', target_root)
 

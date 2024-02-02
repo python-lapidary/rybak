@@ -27,11 +27,11 @@ class Test0(unittest.TestCase):
                         dogs=dict(
                             Pluto='golden',
                             Goofy='black',
-                        )
-                    ))
+                        ),
+                    )
+                ),
             )
             cmp_dirs(test_root / 'output', target_root)
-
 
     def test_error_missing_value(self):
         with tempfile.TemporaryDirectory() as tmp, self.assertRaises(jinja2.UndefinedError):

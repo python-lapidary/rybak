@@ -11,7 +11,7 @@ from rybak.jinja import JinjaAdapter
 logging.basicConfig(
     level=logging.DEBUG,
     stream=sys.stdout,
-    format="%(asctime)s %(levelname)s %(threadName)s %(name)s %(message)s",
+    format='%(asctime)s %(levelname)s %(threadName)s %(name)s %(message)s',
 )
 
 
@@ -34,9 +34,7 @@ def test_gen():
                 empty_directory_name='',
                 empty_file_name='',
             ),
-            excluded=(
-                Path('__pycache__'),
-            ),
+            excluded=[Path('__pycache__')],
             remove_suffixes=('.jinja',),
         )
 

@@ -10,7 +10,7 @@ from rybak.tornado import TornadoAdapter
 logging.basicConfig(
     level=logging.DEBUG,
     stream=sys.stdout,
-    format="%(asctime)s %(levelname)s %(threadName)s %(name)s %(message)s",
+    format='%(asctime)s %(levelname)s %(threadName)s %(name)s %(message)s',
 )
 
 
@@ -30,7 +30,7 @@ def test_gen():
                 content1='foo',
                 content2='bar',
                 content3='baz',
-            )
+            ),
         )
 
         cmp_dirs(test_root / 'output', target_root)

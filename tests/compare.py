@@ -5,12 +5,13 @@ def cmp_dirs(expected: Path, actual: Path) -> None:
     expected_children = {path.name for path in expected.iterdir()}
     actual_children = {path.name for path in actual.iterdir()}
 
-    assert actual_children == expected_children, \
-        ', '.join(str(p) for p in expected_children.symmetric_difference(actual_children))
+    assert actual_children == expected_children, ', '.join(
+        p for p in expected_children.symmetric_difference(actual_children)
+    )
 
     for name in expected_children:
-        expected_path = (expected / name)
-        actual_path = (actual / name)
+        expected_path = expected / name
+        actual_path = actual / name
         if expected_path.is_dir():
             assert actual_path.is_dir(), f'Expected {actual_path} to be a directory'
 

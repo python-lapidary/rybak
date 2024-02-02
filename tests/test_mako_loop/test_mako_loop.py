@@ -17,8 +17,8 @@ def test_gen():
             dict(
                 animals=dict(
                     cat='meows',
-                    dog='barks'
-                )
-            )
+                    dog='barks',
+                ),
+            ),
         )
         cmp_dirs(test_root / 'output', target_root)

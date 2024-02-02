@@ -10,7 +10,7 @@ from rybak.mako import MakoAdapter
 logging.basicConfig(
     level=logging.DEBUG,
     stream=sys.stdout,
-    format="%(asctime)s %(levelname)s %(threadName)s %(name)s %(message)s",
+    format='%(asctime)s %(levelname)s %(threadName)s %(name)s %(message)s',
 )
 
 
