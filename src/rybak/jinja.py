@@ -1,6 +1,6 @@
 from importlib.resources.abc import Traversable
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import jinja2
 
@@ -11,11 +11,8 @@ from .adapter import RendererAdapter
 class JinjaAdapter(RendererAdapter):
     """Adapter for Jinja engine.
     Unless you pass your own jinja.Environment instance, the default for keep_trailing_newline is True."""
-    def __init__(
-        self,
-        environment: Optional[jinja2.Environment] = None,
-        **env_kwargs
-    ) -> None:
+
+    def __init__(self, environment: Optional[jinja2.Environment] = None, **env_kwargs: Any) -> None:
         keep_trailing_newline = env_kwargs.pop('keep_trailing_newline', True)
         self._env = environment or jinja2.Environment(
             keep_trailing_newline=keep_trailing_newline,

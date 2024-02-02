@@ -1,4 +1,4 @@
-from typing import Any, Mapping, TypeAlias, TypeVar, Callable, Iterable
+from typing import Any, Callable, Iterable, Mapping, TypeAlias, TypeVar
 
 TemplateData: TypeAlias = Mapping[str, Any]
 

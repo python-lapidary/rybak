@@ -1,6 +1,6 @@
 __all__ = [
-    'render',
     'TreeRenderer',
+    'render',
 ]
 
 from collections.abc import Iterable
@@ -10,18 +10,18 @@ from typing import Any
 
 from ._types import TemplateData
 from .adapter import RendererAdapter
-from .tree_renderer import TreeRenderer, RenderContext
+from .tree_renderer import RenderContext, TreeRenderer
 
 
 def render(
-        template_root: Traversable,
-        target_root: Path,
-        adapter: type[RendererAdapter] | RendererAdapter,
-        data: TemplateData,
-        *,
-        renderer_args: dict[str, Any] | None = None,
-        excluded: Iterable[Path] = (),
-        remove_suffixes: Iterable[str] = (),
+    template_root: Traversable,
+    target_root: Path,
+    adapter: type[RendererAdapter] | RendererAdapter,
+    data: TemplateData,
+    *,
+    renderer_args: dict[str, Any] | None = None,
+    excluded: Iterable[Path] = (),
+    remove_suffixes: Iterable[str] = (),
 ) -> None:
     """Render a directory-tree from a template and a data dictionary
 
@@ -48,5 +48,5 @@ def render(
             remove_suffixes=remove_suffixes,
         ),
         Path(),
-        Path()
+        Path(),
     ).render(data)

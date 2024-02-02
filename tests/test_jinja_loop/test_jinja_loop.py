@@ -1,9 +1,8 @@
-from pathlib import Path
 import tempfile
+from pathlib import Path
 
 import jinja2
 import jinja2.loaders
-
 from compare import cmp_dirs
 from rybak import render
 from rybak.jinja import JinjaAdapter
@@ -21,7 +20,7 @@ def test_gen():
                 animals={
                     'cat': 'meows',
                     'dog': 'barks',
-                    '':'is silent',
+                    '': 'is silent',
                 }
             ),
             remove_suffixes=('.jinja',)

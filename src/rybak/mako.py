@@ -6,8 +6,8 @@ import functools
 from importlib.resources.abc import Traversable
 from pathlib import Path
 
-import mako.template
 import mako.lookup
+import mako.template
 
 from ._types import LoopOverFn, TemplateData
 from .adapter import RendererAdapter
@@ -18,7 +18,7 @@ class MakoAdapter(RendererAdapter):
         self._loader = mako.lookup.TemplateLookup((template_root,))
 
     def render_str(self, template: str, data: TemplateData, loop_over: LoopOverFn | None = None) -> str:
-        template = self.str_template(template)
+        template = str_template(template)
         return template.render(**data, loop_over=loop_over)
 
     def render_file(self, template_path: Traversable, target_file: Path, data: TemplateData) -> None:
@@ -26,6 +26,7 @@ class MakoAdapter(RendererAdapter):
         text = template.render(**data)
         target_file.write_text(text)
 
-    @functools.lru_cache(maxsize=10)
-    def str_template(self, text: str) -> mako.template.Template:
-        return mako.template.Template(text)
+
+@functools.lru_cache(maxsize=10)
+def str_template(text: str) -> mako.template.Template:
+    return mako.template.Template(text)  # noqa: S702

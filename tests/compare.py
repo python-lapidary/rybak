@@ -2,10 +2,11 @@ from pathlib import Path
 
 
 def cmp_dirs(expected: Path, actual: Path) -> None:
-    expected_children = set(path.name for path in expected.iterdir())
-    actual_children = set(path.name for path in actual.iterdir())
+    expected_children = {path.name for path in expected.iterdir()}
+    actual_children = {path.name for path in actual.iterdir()}
 
-    assert actual_children == expected_children, ', '.join(str(p) for p in expected_children.symmetric_difference(actual_children))
+    assert actual_children == expected_children, \
+        ', '.join(str(p) for p in expected_children.symmetric_difference(actual_children))
 
     for name in expected_children:
         expected_path = (expected / name)

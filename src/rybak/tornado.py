@@ -2,7 +2,6 @@ __all__ = [
     'TornadoAdapter',
 ]
 
-import functools
 from importlib.resources.abc import Traversable
 from pathlib import Path
 
@@ -25,6 +24,5 @@ class TornadoAdapter(RendererAdapter):
         text = template.generate(**data)
         target_file.write_bytes(text)
 
-    @functools.lru_cache(maxsize=10)
     def str_template(self, text: str) -> tornado.template.Template:
         return tornado.template.Template(text, loader=self._loader, autoescape=None)

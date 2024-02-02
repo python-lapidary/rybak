@@ -1,22 +1,23 @@
 import dataclasses
-from functools import cached_property
-from importlib.abc import Traversable
 import logging
 import os.path
+from functools import cached_property
+from importlib.abc import Traversable
 from pathlib import Path
 from typing import Iterable, Never
 
-from ._types import TemplateData, LoopOverFn, RenderFn
+from ._types import LoopOverFn, RenderFn, TemplateData
 from .adapter import RendererAdapter
 
 logger = logging.getLogger(__name__)
 
 
-class StartIteration(Exception):
+class StartIteration(Exception):  # noqa: N818
     """
     Helper exception for loop_over template function. When raised, renderer will iterate over the items.
     Deliberately named after StopIteration.
     """
+
     def __init__(self, items: Iterable) -> None:
         self.items = items
 
@@ -34,8 +35,8 @@ class RenderContext:
     template_root: Traversable
     target_root: Path
     adapter: RendererAdapter
-    excluded: Iterable[Path] = (),
-    remove_suffixes: Iterable[str] = (),
+    excluded: Iterable[Path] = ()
+    remove_suffixes: Iterable[str] = ()
 
     def __post_init__(self):
         if not self.template_root.is_dir():
@@ -84,7 +85,7 @@ class TreeRenderer:
             items = ()
 
         for item in items:
-            target_name = self._render_file_name(template_name, data, lambda _: item)
+            target_name = self._render_file_name(template_name, data, lambda _: item)  # noqa: B023
             if not target_name:
                 logger.info('Skipping, template file name evaluated to empty value')
                 continue
@@ -124,7 +125,7 @@ class TreeRenderer:
             data,
         )
 
-    def _with_subdir(self, template_name, target_name: str) -> 'TreeRenderer':
+    def _with_subdir(self, template_name: str, target_name: str) -> 'TreeRenderer':
         return TreeRenderer(self._context, self._template_path / template_name, self._target_path / target_name)
 
     @cached_property
