@@ -3,7 +3,7 @@ import tempfile
 
 from compare import cmp_dirs
 from rybak import render
-from rybak.mako import MakoRenderer
+from rybak.mako import MakoAdapter
 
 
 def test_gen():
@@ -13,7 +13,7 @@ def test_gen():
         render(
             test_root / 'template',
             target_root,
-            MakoRenderer,
+            MakoAdapter,
             dict(
                 animals=dict(
                     cat='meows',

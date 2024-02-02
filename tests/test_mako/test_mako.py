@@ -5,7 +5,7 @@ import tempfile
 
 from compare import cmp_dirs
 from rybak import render
-from rybak.mako import MakoRenderer
+from rybak.mako import MakoAdapter
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -21,7 +21,7 @@ def test_gen():
         render(
             test_root / 'template',
             target_root,
-            MakoRenderer,
+            MakoAdapter,
             dict(
                 tmpl_dir='target_dir',
                 tmpl_file1='file1.txt',

@@ -6,7 +6,7 @@ import jinja2.loaders
 
 from compare import cmp_dirs
 from rybak import render
-from rybak.jinja import JinjaRenderer
+from rybak.jinja import JinjaAdapter
 
 
 def test_gen():
@@ -16,7 +16,7 @@ def test_gen():
         render(
             test_root / 'template',
             target_root,
-            JinjaRenderer(jinja2.Environment(loader=jinja2.loaders.FileSystemLoader(test_root / 'template'))),
+            JinjaAdapter(loader=jinja2.loaders.FileSystemLoader(test_root / 'template')),
             dict(
                 animals={
                     'cat': 'meows',

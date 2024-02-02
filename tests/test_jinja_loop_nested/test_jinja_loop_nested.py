@@ -7,7 +7,7 @@ import jinja2.loaders
 
 from compare import cmp_dirs
 from rybak import render
-from rybak.jinja import JinjaRenderer
+from rybak.jinja import JinjaAdapter
 
 
 class Test0(unittest.TestCase):
@@ -18,7 +18,7 @@ class Test0(unittest.TestCase):
             render(
                 test_root / 'template',
                 target_root,
-                JinjaRenderer(jinja2.Environment(loader=jinja2.loaders.FileSystemLoader(test_root / 'template'))),
+                JinjaAdapter(loader=jinja2.loaders.FileSystemLoader(test_root / 'template')),
                 dict(
                     animals=dict(
                         cats=dict(
@@ -41,6 +41,6 @@ class Test0(unittest.TestCase):
             render(
                 test_root / 'template',
                 target_root,
-                JinjaRenderer(jinja2.Environment(loader=jinja2.loaders.FileSystemLoader(test_root / 'templates'))),
+                JinjaAdapter(loader=jinja2.loaders.FileSystemLoader(test_root / 'templates')),
                 {},
             )

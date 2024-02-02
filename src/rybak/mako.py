@@ -1,5 +1,5 @@
 __all__ = [
-    'MakoRenderer',
+    'MakoAdapter',
 ]
 
 import functools
@@ -10,10 +10,10 @@ import mako.template
 import mako.lookup
 
 from ._types import LoopOverFn, TemplateData
-from .renderer import Renderer
+from .adapter import RendererAdapter
 
 
-class MakoRenderer(Renderer):
+class MakoAdapter(RendererAdapter):
     def __init__(self, template_root: Path) -> None:
         self._loader = mako.lookup.TemplateLookup((template_root,))
 

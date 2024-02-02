@@ -34,13 +34,13 @@ Similarly to Cookiecutter and Copier, Rybak is template-driven, i.e. the content
 ```python
 from pathlib import Path
 from rybak import render
-from rybak.jinja import JinjaRenderer
-from jinja2 import Environment
+from rybak.jinja import JinjaAdapter
+from jinja2.loaders import FileSystemLoader
 
 render(
     Path('template_root'),
     Path('target_root'),
-    JinjaRenderer(Environment()),
+    JinjaAdapter(loader=FileSystemLoader('template_root')),
     {'likes': {
         'Alice': 'Bob',
         'Bob': 'Charlie',

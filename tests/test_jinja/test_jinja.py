@@ -7,7 +7,7 @@ import jinja2
 
 from compare import cmp_dirs
 from rybak import render
-from rybak.jinja import JinjaRenderer
+from rybak.jinja import JinjaAdapter
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -21,9 +21,9 @@ def test_gen():
         test_root = Path(__file__).parent
         target_root = Path(tmp)
         render(
-            test_root/'template' ,
+            test_root / 'template',
             target_root,
-            JinjaRenderer(jinja2.Environment(loader=jinja2.loaders.FileSystemLoader(test_root/'template'))),
+            JinjaAdapter(loader=jinja2.loaders.FileSystemLoader(test_root / 'template')),
             dict(
                 tmpl_dir='target_dir',
                 tmpl_file1='file1.txt',

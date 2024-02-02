@@ -3,7 +3,7 @@ import tempfile
 
 from compare import cmp_dirs
 from rybak import render
-from rybak.tornado import TornadoRenderer
+from rybak.tornado import TornadoAdapter
 
 
 def test_gen():
@@ -13,7 +13,7 @@ def test_gen():
         render(
             test_root / 'template',
             target_root,
-            TornadoRenderer,
+            TornadoAdapter,
             dict(
                 animals=dict(
                     cat='meows',

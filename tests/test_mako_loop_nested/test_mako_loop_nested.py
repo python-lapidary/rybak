@@ -4,7 +4,7 @@ import unittest
 
 from compare import cmp_dirs
 from rybak import render
-from rybak.mako import MakoRenderer
+from rybak.mako import MakoAdapter
 
 
 class Test0(unittest.TestCase):
@@ -15,7 +15,7 @@ class Test0(unittest.TestCase):
             render(
                 test_root / 'template',
                 target_root,
-                MakoRenderer,
+                MakoAdapter,
                 dict(
                     animals=dict(
                         cats=dict(
@@ -37,6 +37,6 @@ class Test0(unittest.TestCase):
             render(
                 test_root / 'template',
                 target_root,
-                MakoRenderer,
+                MakoAdapter,
                 {},
             )

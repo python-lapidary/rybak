@@ -1,55 +1,66 @@
-from collections.abc import Iterable
+import dataclasses
 from functools import cached_property
 from importlib.abc import Traversable
 import logging
 import os.path
 from pathlib import Path
-from typing import Any
+from typing import Iterable, Never
 
 from ._types import TemplateData, LoopOverFn, RenderFn
-from .loop import LoopContext, loop_over
-from .renderer import Renderer
+from .adapter import RendererAdapter
 
 logger = logging.getLogger(__name__)
 
 
+class StartIteration(Exception):
+    """
+    Helper exception for loop_over template function. When raised, renderer will iterate over the items.
+    Deliberately named after StopIteration.
+    """
+    def __init__(self, items: Iterable) -> None:
+        self.items = items
+
+
+def loop_over(items: Iterable) -> Never:
+    if isinstance(items, str):
+        raise TypeError('Expected an Iterable other than str')
+    if not isinstance(items, Iterable):
+        raise TypeError('Expected an Iterable')
+    raise StartIteration(items)
+
+
+@dataclasses.dataclass
+class RenderContext:
+    template_root: Traversable
+    target_root: Path
+    adapter: RendererAdapter
+    excluded: Iterable[Path] = (),
+    remove_suffixes: Iterable[str] = (),
+
+    def __post_init__(self):
+        if not self.template_root.is_dir():
+            raise ValueError('template_root must exist and be a directory', self.template_root)
+
+
 class TreeRenderer:
-    def __init__(
-            self,
-            template_root: Traversable,
-            target_root: Path,
-            renderer: Renderer,
-            template_path: Traversable = Path(),
-            target_path: Path = Path(),
-            *,
-            excluded: Iterable[Path] | Iterable[str] = (),
-            remove_suffixes: Iterable[str] = (),
-    ) -> None:
-        if not template_root.is_dir():
-            raise TypeError('template_root must exist and be a directory', template_root)
-
-        self._template_root = template_root
-        self._target_root = target_root
-        self._renderer = renderer
-        self._excluded = [Path(i) for i in excluded]
-        self._remove_suffixes = remove_suffixes
-
+    def __init__(self, context: RenderContext, template_path: Traversable, target_path: Path) -> None:
+        self._context = context
         self._template_path = template_path
         self._target_path = target_path
 
-    def render(self, data: Any):
+    def render(self, data: TemplateData):
         for child in self._full_template_path.iterdir():
             self._render(child.name, data)
 
-    def _render(self, file_name: str, data) -> None:
+    def _render(self, file_name: str, data: TemplateData) -> None:
         """Dispatcher method that calls another render method depending on whether the path is a directory or a file"""
 
         rel_path = self._template_path / file_name
-        if rel_path in self._excluded:
+        if rel_path in self._context.excluded:
             logger.debug('Excluded %s', rel_path)
             return
 
-        path = self._template_root / str(rel_path)
+        path = self._context.template_root / str(rel_path)
         if path.is_dir():
             render_single = self._render_dir
         else:
@@ -64,18 +75,18 @@ class TreeRenderer:
         try:
             target_name = self._render_file_name(template_name, data, loop_over)
             if not target_name:
-                logger.info('Skipping, template evaluated to empty value')
+                logger.info('Skipping, template file name evaluated to empty value')
                 return
             render_single(template_name, target_name, data)
-        except LoopContext as loop:
-            items = loop.items
+        except StartIteration as e:
+            items = e.items
         else:
             items = ()
 
         for item in items:
             target_name = self._render_file_name(template_name, data, lambda _: item)
             if not target_name:
-                logger.info('Skipping, template evaluated to empty value')
+                logger.info('Skipping, template file name evaluated to empty value')
                 continue
             render_single(template_name, target_name, {**data, 'item': item})
 
@@ -92,11 +103,11 @@ class TreeRenderer:
         self._with_subdir(template_name, target_name).render(data)
 
     def _render_file_name(self, template: str, data: TemplateData, loop_over_: LoopOverFn) -> str:
-        if self._remove_suffixes:
+        if self._context.remove_suffixes:
             root, ext = os.path.splitext(template)
-            if ext in self._remove_suffixes:
+            if ext in self._context.remove_suffixes:
                 template = root
-        target_name = self._renderer.render_str(
+        target_name = self._context.adapter.render_str(
             template,
             data,
             loop_over_,
@@ -107,27 +118,19 @@ class TreeRenderer:
         logger.debug('Render to file %s', self._target_path / target_name)
         target_path = self._full_target_path / target_name
         target_path.parent.mkdir(parents=True, exist_ok=True)
-        self._renderer.render_file(
+        self._context.adapter.render_file(
             self._template_path / template_name,
             target_path,
             data,
         )
 
     def _with_subdir(self, template_name, target_name: str) -> 'TreeRenderer':
-        return TreeRenderer(
-            self._template_root,
-            self._target_root,
-            self._renderer,
-            self._template_path / template_name,
-            self._target_path / target_name,
-            excluded=self._excluded,
-            remove_suffixes=self._remove_suffixes,
-        )
+        return TreeRenderer(self._context, self._template_path / template_name, self._target_path / target_name)
 
     @cached_property
     def _full_template_path(self) -> Traversable:
-        return self._template_root / str(self._template_path)
+        return self._context.template_root / str(self._template_path)
 
     @cached_property
     def _full_target_path(self) -> Path:
-        return self._target_root / self._target_path
+        return self._context.target_root / self._target_path

@@ -1,5 +1,5 @@
 __all__ = [
-    'TornadoRenderer',
+    'TornadoAdapter',
 ]
 
 import functools
@@ -9,10 +9,10 @@ from pathlib import Path
 import tornado.template
 
 from ._types import LoopOverFn, TemplateData
-from .renderer import Renderer
+from .adapter import RendererAdapter
 
 
-class TornadoRenderer(Renderer):
+class TornadoAdapter(RendererAdapter):
     def __init__(self, template_root: Path) -> None:
         self._loader = tornado.template.Loader(str(template_root))
 

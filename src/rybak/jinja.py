@@ -1,22 +1,26 @@
 from importlib.resources.abc import Traversable
 from pathlib import Path
+from typing import Optional
 
 import jinja2
 
 from ._types import LoopOverFn, TemplateData
-from .renderer import Renderer
+from .adapter import RendererAdapter
 
 
-class JinjaRenderer(Renderer):
+class JinjaAdapter(RendererAdapter):
+    """Adapter for Jinja engine.
+    Unless you pass your own jinja.Environment instance, the default for keep_trailing_newline is True."""
     def __init__(
         self,
-        environment: jinja2.Environment,
-        force_keep_trailing_newline: bool = True
+        environment: Optional[jinja2.Environment] = None,
+        **env_kwargs
     ) -> None:
-        self._env = environment
-
-        if force_keep_trailing_newline:
-            self._env = environment.overlay(keep_trailing_newline=True)
+        keep_trailing_newline = env_kwargs.pop('keep_trailing_newline', True)
+        self._env = environment or jinja2.Environment(
+            keep_trailing_newline=keep_trailing_newline,
+            **env_kwargs,
+        )
 
     def render_str(self, template: str, data: TemplateData, loop_over: LoopOverFn | None = None) -> str:
         env = self._env.overlay()
