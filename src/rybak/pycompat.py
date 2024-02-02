@@ -8,7 +8,7 @@ import sys
 if sys.version_info >= (3, 12):
     from importlib.resources.abc import Traversable
 else:
-    from importlib_resources.abc import Traversable
+    from importlib_resources.abc import Traversable  # type: ignore[import-not-found]
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias

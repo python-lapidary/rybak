@@ -6,6 +6,7 @@ import jinja2
 import jinja2.loaders
 from compare import cmp_dirs
 from rybak import render
+from rybak._types import RenderError
 from rybak.jinja import JinjaAdapter
 
 
@@ -34,7 +35,7 @@ class Test0(unittest.TestCase):
             cmp_dirs(test_root / 'output', target_root)
 
     def test_error_missing_value(self):
-        with tempfile.TemporaryDirectory() as tmp, self.assertRaises(jinja2.UndefinedError):
+        with tempfile.TemporaryDirectory() as tmp, self.assertRaises(RenderError):
             test_root = Path(__file__).parent
             target_root = Path(tmp)
             render(
