@@ -8,7 +8,6 @@ import jinja2
 from compare import cmp_dirs
 from rybak import render
 from rybak.jinja import JinjaRenderer
-from rybak.tornado import TornadoRenderer
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -36,7 +35,8 @@ def test_gen():
             ),
             excluded=(
                 Path('__pycache__'),
-            )
+            ),
+            remove_suffixes=('.jinja',),
         )
 
         cmp_dirs(test_root / 'output', target_root)

@@ -22,6 +22,7 @@ def render(
         *,
         renderer_args: dict[str, Any] | None = None,
         excluded: Iterable[Path] = (),
+        remove_suffixes: Iterable[str] = (),
 ) -> None:
     actual_renderer = (
         renderer_
@@ -34,4 +35,5 @@ def render(
         target_root,
         actual_renderer,
         excluded=excluded,
+        remove_suffixes=remove_suffixes,
     ).render(data)

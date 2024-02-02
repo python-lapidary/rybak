@@ -2,10 +2,11 @@ from collections.abc import Iterable
 from functools import cached_property
 from importlib.abc import Traversable
 import logging
+import os.path
 from pathlib import Path
 from typing import Any
 
-from ._types import TemplateData
+from ._types import TemplateData, LoopOverFn
 from .loop import LoopContext, loop_over
 from .renderer import Renderer
 
@@ -22,6 +23,7 @@ class TreeRenderer:
             target_path: Path = Path(),
             *,
             excluded: Iterable[Path] | Iterable[str] = (),
+            remove_suffixes: Iterable[str] = (),
     ) -> None:
         if not template_root.is_dir():
             raise TypeError('template_root must exist and be a directory', template_root)
@@ -29,7 +31,8 @@ class TreeRenderer:
         self._template_root = template_root
         self._target_root = target_root
         self._renderer = renderer
-        self._excluded = tuple(Path(i) for i in excluded)
+        self._excluded = [Path(i) for i in excluded]
+        self._remove_suffixes = remove_suffixes
 
         self._template_path = template_path
         self._target_path = target_path
@@ -58,9 +61,7 @@ class TreeRenderer:
         logger.debug('Render from dir %s', template_path)
 
         try:
-            target_name = self._renderer.render_str(file_name, {
-                **data,
-            }, loop_over)
+            target_name = self._render_file_name(file_name, data, loop_over)
             if not target_name:
                 logger.info('Skipping, template evaluated to empty value')
             self._render_dir(file_name, target_name, data)
@@ -70,9 +71,7 @@ class TreeRenderer:
             items = ()
 
         for item in items:
-            target_name = self._renderer.render_str(file_name, {
-                **data,
-            }, lambda _: item, )
+            target_name = self._render_file_name(file_name, data, lambda _: item)
             self._render_dir(file_name, target_name, {**data, 'item': item})
 
     def _render_dir(self, template_name: str, target_name: str, data: dict[str, Any]):
@@ -93,9 +92,7 @@ class TreeRenderer:
         logger.debug('Render from file %s', template_path)
 
         try:
-            target_name = self._renderer.render_str(template_name, {
-                **data,
-            }, loop_over)
+            target_name = self._render_file_name(template_name, data, loop_over)
             if not target_name:
                 logger.info('Skipping, template evaluated to empty value')
                 return
@@ -106,10 +103,20 @@ class TreeRenderer:
             items = ()
 
         for item in items:
-            target_name = self._renderer.render_str(template_name, {
-                **data,
-            }, lambda _: item, )
+            target_name = self._render_file_name(template_name, data, lambda _: item)
             self._render_file(template_name, target_name, {**data, 'item': item})
+
+    def _render_file_name(self, template: str, data: TemplateData, loop_over_: LoopOverFn) -> str:
+        target_name = self._renderer.render_str(
+            template,
+            data,
+            loop_over_,
+        )
+        if self._remove_suffixes:
+            root, ext = os.path.splitext(target_name)
+            if ext in self._remove_suffixes:
+                return root
+        return target_name
 
     def _render_file(self, template_name: str, target_name: str, data: TemplateData) -> None:
         logger.debug('Render to file %s', self._target_path / target_name)
@@ -129,6 +136,7 @@ class TreeRenderer:
             self._template_path / template_name,
             self._target_path / target_name,
             excluded=self._excluded,
+            remove_suffixes=self._remove_suffixes,
         )
 
     @cached_property

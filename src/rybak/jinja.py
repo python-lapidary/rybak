@@ -8,8 +8,15 @@ from .renderer import Renderer
 
 
 class JinjaRenderer(Renderer):
-    def __init__(self, environment: jinja2.Environment) -> None:
+    def __init__(
+        self,
+        environment: jinja2.Environment,
+        force_keep_trailing_newline: bool = True
+    ) -> None:
         self._env = environment
+
+        if force_keep_trailing_newline:
+            self._env = environment.overlay(keep_trailing_newline=True)
 
     def render_str(self, template: str, data: TemplateData, loop_over: LoopOverFn | None = None) -> str:
         env = self._env.overlay()

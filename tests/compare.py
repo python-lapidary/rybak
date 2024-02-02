@@ -5,7 +5,7 @@ def cmp_dirs(expected: Path, actual: Path) -> None:
     expected_children = set(path.name for path in expected.iterdir())
     actual_children = set(path.name for path in actual.iterdir())
 
-    assert actual_children == expected_children, ', '.join(str(p) for p in actual_children)
+    assert actual_children == expected_children, ', '.join(str(p) for p in expected_children.symmetric_difference(actual_children))
 
     for name in expected_children:
         expected_path = (expected / name)
@@ -20,6 +20,6 @@ def cmp_dirs(expected: Path, actual: Path) -> None:
             expected_text = expected_path.read_text()
             actual_text = actual_path.read_text()
 
-            assert expected_text == actual_text, f'{actual_path}: {actual_text}'
+            assert expected_text == actual_text, f'"{expected_text}" != "{actual_text}"'
         else:
             raise TypeError('Neither a file nor a directory', expected_path)
