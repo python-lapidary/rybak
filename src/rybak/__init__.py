@@ -1,4 +1,5 @@
 __all__ = [
+    'RenderError',
     'TreeRenderer',
     'render',
 ]
@@ -6,7 +7,7 @@ __all__ = [
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Optional, Type, Union
 
-from ._types import TemplateData
+from ._types import RenderError, TemplateData
 from .adapter import RendererAdapter
 from .pycompat import Traversable
 from .tree_renderer import RenderContext, TreeRenderer
