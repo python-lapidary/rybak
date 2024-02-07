@@ -22,16 +22,16 @@ class JinjaAdapter(RendererAdapter):
         env = self._env.overlay()
         env.globals['loop_over'] = loop_over
 
-        template_obj = env.from_string(template)
         try:
+            template_obj = env.from_string(template)
             return template_obj.render(**data)
-        except jinja2.TemplateError as e:
+        except (jinja2.TemplateError, ValueError) as e:
             raise RenderError from e
 
     def render_file(self, template_path: str, target_file: Path, data: TemplateData) -> None:
-        template_obj = self._env.get_template(template_path)
         try:
+            template_obj = self._env.get_template(template_path)
             text = template_obj.render(**data)
-        except jinja2.TemplateError as e:
+        except (jinja2.TemplateError, ValueError) as e:
             raise RenderError from e
         target_file.write_text(text)

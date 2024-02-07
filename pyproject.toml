@@ -40,7 +40,7 @@ pythonpath = [
 
 [tool.ruff]
 extend-select = [
-    'A', 'ANN0', 'B', 'BLE', 'C4', 'C90', 'COM818', 'E', 'FBT','FURB', 'I', 'N', 'PERF', 'PIE', 'PYI', 'RUF', 'S',
+    'A', 'ANN0', 'B', 'BLE', 'C4', 'C90', 'COM818', 'E','FURB', 'I', 'N', 'PERF', 'PIE', 'PYI', 'RUF', 'S',
     'T10', 'T20', 'UP', 'W'
 ]
 line-length = 120
