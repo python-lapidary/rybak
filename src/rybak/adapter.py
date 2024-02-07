@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Any
 
 from ._types import LoopOverFn, TemplateData
-from .pycompat import Traversable
 
 
 class RendererAdapter(abc.ABC):
@@ -16,5 +15,5 @@ class RendererAdapter(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def render_file(self, template_file: Traversable, target_file: Path, data: TemplateData) -> None:
+    def render_file(self, template_path: str, target_file: Path, data: TemplateData) -> None:
         pass

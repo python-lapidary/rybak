@@ -28,8 +28,8 @@ class JinjaAdapter(RendererAdapter):
         except jinja2.TemplateError as e:
             raise RenderError from e
 
-    def render_file(self, template_path: Path, target_file: Path, data: TemplateData) -> None:
-        template_obj = self._env.get_template(template_path.as_posix())
+    def render_file(self, template_path: str, target_file: Path, data: TemplateData) -> None:
+        template_obj = self._env.get_template(template_path)
         try:
             text = template_obj.render(**data)
         except jinja2.TemplateError as e:

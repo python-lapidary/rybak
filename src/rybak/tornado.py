@@ -9,7 +9,6 @@ import tornado.template
 
 from ._types import LoopOverFn, TemplateData
 from .adapter import RendererAdapter
-from .pycompat import Traversable
 
 
 class TornadoAdapter(RendererAdapter):
@@ -20,8 +19,8 @@ class TornadoAdapter(RendererAdapter):
         template_obj = self.str_template(template)
         return template_obj.generate(**data, loop_over=loop_over).decode('UTF-8')
 
-    def render_file(self, template_path: Traversable, target_file: Path, data: TemplateData) -> None:
-        template = self._loader.load(str(template_path))
+    def render_file(self, template_path: str, target_file: Path, data: TemplateData) -> None:
+        template = self._loader.load(template_path)
         text = template.generate(**data)
         target_file.write_bytes(text)
 

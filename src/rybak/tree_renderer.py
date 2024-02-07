@@ -120,7 +120,7 @@ class TreeRenderer:
         target_path = self._full_target_path / target_name
         target_path.parent.mkdir(parents=True, exist_ok=True)
         self._context.adapter.render_file(
-            self._template_path / template_name,
+            (self._template_path / template_name).as_posix(),
             target_path,
             data,
         )
