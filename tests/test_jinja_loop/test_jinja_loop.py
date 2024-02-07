@@ -3,9 +3,10 @@ from pathlib import Path
 
 import jinja2
 import jinja2.loaders
-from compare import cmp_dirs
 from rybak import render
 from rybak.jinja import JinjaAdapter
+
+from tests.compare import cmp_dirs
 
 
 def test_gen():

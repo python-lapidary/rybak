@@ -3,9 +3,10 @@ import sys
 import tempfile
 from pathlib import Path
 
-from compare import cmp_dirs
 from rybak import render
 from rybak.tornado import TornadoAdapter
+
+from tests.compare import cmp_dirs
 
 logging.basicConfig(
     level=logging.DEBUG,

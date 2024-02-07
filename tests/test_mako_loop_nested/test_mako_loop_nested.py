@@ -2,9 +2,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from compare import cmp_dirs
 from rybak import render
 from rybak.mako import MakoAdapter
+
+from tests.compare import cmp_dirs
 
 
 class Test0(unittest.TestCase):
