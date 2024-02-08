@@ -4,49 +4,38 @@ __all__ = [
     'render',
 ]
 
-from pathlib import Path
-from typing import Any, Iterable, Mapping, Optional, Type, Union
+from pathlib import Path, PurePath
+from typing import Iterable, Union
 
 from ._types import RenderError, TemplateData
 from .adapter import RendererAdapter
-from .pycompat import Traversable
 from .tree_renderer import RenderContext, TreeRenderer
 
 
 def render(
-    template_root: Traversable,
     target_root: Path,
-    adapter: Union[Type[RendererAdapter], RendererAdapter],
+    adapter: RendererAdapter,
     data: TemplateData,
     *,
-    renderer_args: Optional[Mapping[str, Any]] = None,
-    excluded: Iterable[Path] = (),
+    excluded: Union[Iterable[Path], Iterable[str]] = (),
     remove_suffixes: Iterable[str] = (),
 ) -> None:
     """Render a directory-tree from a template and a data dictionary
 
-    :param template_root: root template directory (filesystem or importlib resource)
     :param target_root: render target root directory (filesystem)
-    :param adapter: template engine adapter (jinja, mako, tornado) or its type
+    :param adapter: template engine adapter (jinja, mako)
     :param data: template data
-    :param renderer_args: parameters for template engine adapter, when just the adapter class is passed
     :param excluded: paths within the template root directory, which are not templates
     :param remove_suffixes: filename suffixes to be removed when rendering file names, in `.suffix` format
     """
-    actual_renderer = (
-        adapter
-        if isinstance(adapter, RendererAdapter)
-        else adapter(template_root=template_root, **renderer_args if renderer_args else {})
-    )
-
+    exclude_paths = {Path(path) for path in excluded}
     TreeRenderer(
         RenderContext(
-            template_root=template_root,
             target_root=target_root,
-            adapter=actual_renderer,
-            excluded=excluded,
+            adapter=adapter,
+            excluded=exclude_paths,
             remove_suffixes=remove_suffixes,
         ),
-        Path(),
+        PurePath(),
         Path(),
     ).render(data)

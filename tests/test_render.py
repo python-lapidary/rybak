@@ -1,9 +1,11 @@
 from itertools import product
 from pathlib import Path
-from typing import Any, Iterable, Mapping, NamedTuple, Optional
+from typing import Any, Callable, Iterable, Mapping, NamedTuple, Optional
 
+import jinja2
 import pytest
 from rybak import RenderError, render
+from rybak.adapter import RendererAdapter
 from rybak.jinja import JinjaAdapter
 from rybak.mako import MakoAdapter
 
@@ -69,7 +71,7 @@ jinja_test_data: Iterable[TestData] = [
 ]
 
 adapters = {
-    'jinja': JinjaAdapter,
+    'jinja': lambda template_root: JinjaAdapter(loader=jinja2.FileSystemLoader(template_root)),
     'mako': MakoAdapter,
 }
 
@@ -79,21 +81,28 @@ exclusions = {
 }
 
 adapter_test_data = [
-    (adapter, *param_set, exclusions[adapter]) for adapter, param_set in product(adapters.keys(), jinja_test_data)
+    (*adapter, *param_set, exclusions[adapter[0]]) for adapter, param_set in product(adapters.items(), jinja_test_data)
 ]
 
 
-@pytest.mark.parametrize('renderer,test_name,data,error,excluded', adapter_test_data)
-def test_render(renderer: str, test_name: str, data: Mapping, error: bool, excluded: Iterable, tmp_path: Path) -> None:
+@pytest.mark.parametrize('adapter_name,adapter,test_name,data,error,excluded', adapter_test_data)
+def test_render(
+    adapter_name: str,
+    adapter: Callable[[Path], RendererAdapter],
+    test_name: str,
+    data: Mapping,
+    error: bool,
+    excluded: Iterable,
+    tmp_path: Path,
+) -> None:
     root = Path(__file__).parent / 'test_render'
-    target_path = tmp_path / f'{renderer}_{test_name}'
+    target_path = tmp_path / f'{adapter_name}_{test_name}'
     target_path.mkdir()
 
     def fn():
         render(
-            root / 'templates' / renderer / test_name,
             target_path,
-            adapters[renderer],
+            adapter(root / 'templates' / adapter_name / test_name),
             data,
             excluded=[Path(item) for item in excluded] + [Path('__pycache__')],
             remove_suffixes=['.jinja', '.mako'],

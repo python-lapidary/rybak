@@ -2,7 +2,7 @@ import dataclasses
 import logging
 import os.path
 from functools import cached_property
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import Iterable, NoReturn
 
 from ._types import LoopOverFn, RenderFn, TemplateData
@@ -32,19 +32,14 @@ def loop_over(items: Iterable) -> NoReturn:
 
 @dataclasses.dataclass
 class RenderContext:
-    template_root: Traversable
     target_root: Path
     adapter: RendererAdapter
-    excluded: Iterable[Path] = ()
-    remove_suffixes: Iterable[str] = ()
-
-    def __post_init__(self):
-        if not self.template_root.is_dir():
-            raise ValueError('template_root must exist and be a directory', self.template_root)
+    excluded: Iterable[PurePath]
+    remove_suffixes: Iterable[str]
 
 
 class TreeRenderer:
-    def __init__(self, context: RenderContext, template_path: Path, target_path: Path) -> None:
+    def __init__(self, context: RenderContext, template_path: PurePath, target_path: Path) -> None:
         self._context = context
         self._template_path = template_path
         self._target_path = target_path
@@ -61,7 +56,7 @@ class TreeRenderer:
             logger.debug('Excluded %s', rel_path)
             return
 
-        path = self._context.template_root / str(rel_path)
+        path = self._context.adapter.template_root / rel_path
         if path.is_dir():
             render_single = self._render_dir
         else:
@@ -130,7 +125,7 @@ class TreeRenderer:
 
     @cached_property
     def _full_template_path(self) -> Traversable:
-        return self._context.template_root / str(self._template_path)
+        return self._context.adapter.template_root / str(self._template_path)
 
     @cached_property
     def _full_target_path(self) -> Path:

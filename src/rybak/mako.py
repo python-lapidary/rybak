@@ -6,12 +6,13 @@ import functools
 from pathlib import Path
 from typing import Optional
 
-import mako.exceptions
+import mako.exceptions  # type: ignore[import-untyped]
 import mako.lookup
 import mako.template
 
 from ._types import LoopOverFn, RenderError, TemplateData
 from .adapter import RendererAdapter
+from .pycompat import Traversable
 
 
 class MakoAdapter(RendererAdapter):
@@ -32,6 +33,13 @@ class MakoAdapter(RendererAdapter):
         except (AttributeError, mako.exceptions.MakoException, ValueError) as e:
             raise RenderError from e
         target_file.write_text(text)
+
+    @property
+    def template_root(self) -> Traversable:
+        paths = self._loader.directories
+        if len(paths) != 1:
+            raise ValueError('Template root path must be a single path')
+        return Path(paths[0])
 
 
 @functools.lru_cache(maxsize=10)

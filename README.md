@@ -37,7 +37,6 @@ from rybak.jinja import JinjaAdapter
 from jinja2.loaders import FileSystemLoader
 
 render(
-    Path('template_root'),
     Path('target_root'),
     JinjaAdapter(loader=FileSystemLoader('template_root')),
     {'likes': {
