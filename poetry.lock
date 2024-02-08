@@ -305,9 +305,8 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [extras]
 jinja = ["jinja2"]
 mako = ["mako"]
-tornado = ["tornado"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0"
-content-hash = "a37d2aca09c8083a5564bdc9b8c5cf649bb3f89421582d6d9fefc20af8357cf0"
+content-hash = "7c1a8c4787968463efe7e7c32ab02272a11598db95aa1c1d585d3aa20628c904"
