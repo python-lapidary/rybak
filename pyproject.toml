@@ -35,6 +35,12 @@ pythonpath = [
     '.',
     'tests',
 ]
+[tool.coverage.report]
+exclude_lines = [
+    "@abc.abstractmethod",
+    "pragma: no cover",
+]
+
 
 [tool.ruff]
 extend-select = [
