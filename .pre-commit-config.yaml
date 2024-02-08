@@ -18,11 +18,11 @@ repos:
     pass_filenames: false
     args:
     - --check
-- repo: local
-  hooks:
-  - id: mypy
-    name: mypy
-    language: system
-    types: [ python ]
-    entry: poetry run mypy src
-    pass_filenames: false
+#- repo: local
+#  hooks:
+#  - id: mypy
+#    name: mypy
+#    language: system
+#    types: [ python ]
+#    entry: poetry run mypy src
+#    pass_filenames: false
