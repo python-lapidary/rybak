@@ -23,8 +23,7 @@ software projects, rybak is a library for generating any directory tree structur
 
 Rybak template is a directory consisting of template files.
 [Jinja](https://pypi.org/project/jinja2/),
-[Mako](https://pypi.org/project/mako/)
-and [Tornado](https://pypi.org/project/tornado/)
+and [Mako](https://pypi.org/project/mako/)
 are supported, thou a single project can only use a single template engine.
 
 Similarly to Cookiecutter and Copier, Rybak is template-driven, i.e. the contents of the template directory decides how the model data is used.
@@ -116,4 +115,4 @@ In this case the file name template simplifies to `{{loop_over(likes).name}}` an
 
 Rybak templates can work with either of Jinja, Mako or Torado; so typically you need to install Rybak and one of those libraries.
 
-installing `rybak[jinja]`, `rybak[mako]` or `rybak[tornado]` will handle this.
+installing `rybak[jinja]` or `rybak[mako]` will handle this.

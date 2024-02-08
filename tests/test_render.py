@@ -6,7 +6,6 @@ import pytest
 from rybak import RenderError, render
 from rybak.jinja import JinjaAdapter
 from rybak.mako import MakoAdapter
-from rybak.tornado import TornadoAdapter
 
 from tests.compare import cmp_dirs
 
@@ -72,13 +71,11 @@ jinja_test_data: Iterable[TestData] = [
 adapters = {
     'jinja': JinjaAdapter,
     'mako': MakoAdapter,
-    'tornado': TornadoAdapter,
 }
 
 exclusions = {
     'jinja': ['{{tmpl_dir}}/excluded_file.txt'],
     'mako': ['${tmpl_dir}/excluded_file.txt'],
-    'tornado': ['{{tmpl_dir}}/excluded_file.txt'],
 }
 
 adapter_test_data = [
