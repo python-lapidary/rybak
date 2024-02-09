@@ -1,10 +1,23 @@
 # Rybak
+_/ˈrɨ.bak/_
 
-Project generator library.
+Directory-tree generator library.
+
+## Synopsis
+
+Rybak is an extension of template engines, which instead of rendering a single file or string, renders a whole directory.
+
+In a way it's similar to [Cookiecutter](https://pypi.org/project/cookiecutter/) or [Copier](https://pypi.org/project/copier/), but while these programs are designed specifically for generating
+software projects, while Rybak is a library for generating arbitrary directory tree structures.
+
+Rybak template is a directory consisting of template files.
+[Jinja](https://pypi.org/project/jinja2/),
+and [Mako](https://pypi.org/project/mako/)
+are supported, though one project can only use a single template engine.
 
 Goals:
 
-- [x] generate projects based on a user-provided template and data,
+- [x] generate directory-tree based on a user-provided template and data,
 - [ ] keep track and remove files that aren't produced by the template, but accept path patterns to keep,
 - [x] allow for multiple files to be generated from a single template file,
 - [ ] support but don't require templates to be git or other DCVS repositories.
@@ -13,20 +26,6 @@ Non-goals:
 
 - command line interface,
 - prompting users for template data.
-
-## Synopsis
-
-Rybak (y is pronounced as in pick or sit) is an extension of template engines, which instead of rendering a single file or string, renders a whole directory.
-
-In a way it's similar to [Cookiecutter](https://pypi.org/project/cookiecutter/) or [Copier](https://pypi.org/project/copier/), but while these programs are designed specifically for generating
-software projects, rybak is a library for generating any directory tree structure.
-
-Rybak template is a directory consisting of template files.
-[Jinja](https://pypi.org/project/jinja2/),
-and [Mako](https://pypi.org/project/mako/)
-are supported, thou a single project can only use a single template engine.
-
-Similarly to Cookiecutter and Copier, Rybak is template-driven, i.e. the contents of the template directory decides how the model data is used.
 
 ## Usage
 
@@ -115,3 +114,14 @@ In this case the file name template simplifies to `{{loop_over(likes).name}}` an
 Rybak templates can work with either of Jinja, Mako or Torado; so typically you need to install Rybak and one of those libraries.
 
 installing `rybak[jinja]` or `rybak[mako]` will handle this.
+
+## Name
+
+'y' is pronounced like in 'sit',
+'a' like in 'father', just shorter.
+
+Rybak is a Polish word for fisherman.
+
+The original idea was to only support Mako templates, which is named by a species of a shark.
+
+Functionality of this library is provided by the template engine, so picture a fisherman pulled by a shark.
