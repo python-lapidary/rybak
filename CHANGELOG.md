@@ -5,12 +5,18 @@
 ### Changed
 
 - Wrap render errors in `RenderError`.
-- Renamed engine adapters from ${engine}Renderer to ${engine}Adapter.
+- Rename engine adapters from ${engine}Renderer to ${engine}Adapter.
+- Reorder `render()` parameters to follow `source, target, options`.
 - Rename parameter `excluded` to `exclude` and set default to `__pycache__`.
 
 ### Added
 
 - Add `remove_suffixes` and `exclude_extend` optional parameters to `render()`.
+
+### Removed
+
+- Remove support for tornado.
+- Remove `template_root` parameter from `redner()` - it's taken from the `adapter`.
 
 ### Fixed
 
