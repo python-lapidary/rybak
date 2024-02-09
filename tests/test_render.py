@@ -13,14 +13,14 @@ from rybak.mako import MakoAdapter
 from tests.compare import cmp_dirs
 
 
-class TestData(NamedTuple):
+class E2eTestData(NamedTuple):
     test_name: str
     data: Mapping[str, Any]
     error: Optional[bool] = False
 
 
-jinja_test_data: Iterable[TestData] = [
-    TestData(
+e2e_test_data: Iterable[E2eTestData] = [
+    E2eTestData(
         'simple',
         dict(
             tmpl_dir='target_dir',
@@ -34,7 +34,7 @@ jinja_test_data: Iterable[TestData] = [
             empty_file_name='',
         ),
     ),
-    TestData(
+    E2eTestData(
         'loop',
         dict(
             animals={
@@ -44,7 +44,7 @@ jinja_test_data: Iterable[TestData] = [
             }
         ),
     ),
-    TestData(
+    E2eTestData(
         'loop_nested',
         dict(
             animals=dict(
@@ -59,12 +59,12 @@ jinja_test_data: Iterable[TestData] = [
             )
         ),
     ),
-    TestData(
+    E2eTestData(
         'loop_nested',
         {},
         error=True,
     ),
-    TestData(
+    E2eTestData(
         'missing_file',
         {},
         error=True,
@@ -82,7 +82,7 @@ exclusions = {
 }
 
 adapter_test_data = [
-    (*adapter, *param_set, exclusions[adapter[0]]) for adapter, param_set in product(adapters.items(), jinja_test_data)
+    (*adapter, *param_set, exclusions[adapter[0]]) for adapter, param_set in product(adapters.items(), e2e_test_data)
 ]
 
 
