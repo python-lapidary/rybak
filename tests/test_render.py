@@ -105,9 +105,9 @@ def test_render(
 
     def fn():
         render(
-            target_path,
             adapter(root / 'templates' / adapter_name / test_name),
             data,
+            target_path,
             excluded=[Path(item) for item in excluded] + [Path('__pycache__')],
             remove_suffixes=['.jinja', '.mako'],
         )

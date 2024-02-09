@@ -13,9 +13,9 @@ from .tree_renderer import RenderContext, TreeRenderer
 
 
 def render(
-    target_root: Path,
     adapter: RendererAdapter,
     data: TemplateData,
+    target_root: Path,
     *,
     excluded: Union[Iterable[Path], Iterable[str]] = (),
     remove_suffixes: Iterable[str] = (),
@@ -31,8 +31,8 @@ def render(
     exclude_paths = {Path(path) for path in excluded}
     TreeRenderer(
         RenderContext(
-            target_root=target_root,
             adapter=adapter,
+            target_root=target_root,
             excluded=exclude_paths,
             remove_suffixes=remove_suffixes,
         ),

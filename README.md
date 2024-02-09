@@ -36,13 +36,13 @@ from rybak.jinja import JinjaAdapter
 from jinja2.loaders import FileSystemLoader
 
 render(
-    Path('target_root'),
     JinjaAdapter(loader=FileSystemLoader('template_root')),
     {'likes': {
         'Alice': 'Bob',
-        'Bob': 'Charlie',
-        'Charlie': 'cats',
+      'Bob': 'Charlie',
+      'Charlie': 'cats',
     }},
+    Path('target_root'),
 )
 ```
 
