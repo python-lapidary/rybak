@@ -4,6 +4,7 @@ __all__ = [
     'render',
 ]
 
+from itertools import chain
 from pathlib import Path, PurePath
 from typing import Iterable, Union
 
@@ -17,7 +18,8 @@ def render(
     data: TemplateData,
     target_root: Path,
     *,
-    excluded: Union[Iterable[Path], Iterable[str]] = (),
+    exclude: Union[Iterable[Path], Iterable[str]] = ('__pycache__',),
+    exclude_extend: Union[Iterable[Path], Iterable[str]] = (),
     remove_suffixes: Iterable[str] = (),
 ) -> None:
     """Render a directory-tree from a template and a data dictionary
@@ -25,15 +27,16 @@ def render(
     :param target_root: render target root directory (filesystem)
     :param adapter: template engine adapter (jinja, mako)
     :param data: template data
-    :param excluded: paths within the template root directory, which are not templates
+    :param exclude: paths within the template root directory, which are not templates. Defaults to '__pycache__'
+    :param exclude_extend: paths to be added to the default exclude list.
     :param remove_suffixes: filename suffixes to be removed when rendering file names, in `.suffix` format
     """
-    exclude_paths = {Path(path) for path in excluded}
+    exclude_paths = {Path(path) for path in chain(exclude, exclude_extend)}
     TreeRenderer(
         RenderContext(
             adapter=adapter,
             target_root=target_root,
-            excluded=exclude_paths,
+            exclude=exclude_paths,
             remove_suffixes=remove_suffixes,
         ),
         PurePath(),

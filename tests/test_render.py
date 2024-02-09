@@ -86,14 +86,14 @@ adapter_test_data = [
 ]
 
 
-@pytest.mark.parametrize('adapter_name,adapter,test_name,data,error,excluded', adapter_test_data)
+@pytest.mark.parametrize('adapter_name,adapter,test_name,data,error,exclude', adapter_test_data)
 def test_render(
     adapter_name: str,
     adapter: Callable[[Path], RendererAdapter],
     test_name: str,
     data: Mapping,
     error: bool,
-    excluded: Iterable,
+    exclude: Iterable[str],
     tmp_path: Path,
 ) -> None:
     if adapter_name == 'mako' and sys.platform == 'win32':
@@ -108,7 +108,7 @@ def test_render(
             adapter(root / 'templates' / adapter_name / test_name),
             data,
             target_path,
-            excluded=[Path(item) for item in excluded] + [Path('__pycache__')],
+            exclude_extend=exclude,
             remove_suffixes=['.jinja', '.mako'],
         )
 

@@ -6,10 +6,11 @@
 
 - Wrap render errors in `RenderError`.
 - Renamed engine adapters from ${engine}Renderer to ${engine}Adapter.
+- Rename parameter `excluded` to `exclude` and set default to `__pycache__`.
 
 ### Added
 
-- Add `remove_suffixes` optional parameter to `render()`.
+- Add `remove_suffixes` and `exclude_extend` optional parameters to `render()`.
 
 ### Fixed
 

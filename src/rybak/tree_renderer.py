@@ -34,7 +34,7 @@ def loop_over(items: Iterable) -> NoReturn:
 class RenderContext:
     target_root: Path
     adapter: RendererAdapter
-    excluded: Iterable[PurePath]
+    exclude: Iterable[PurePath]
     remove_suffixes: Iterable[str]
 
 
@@ -52,7 +52,7 @@ class TreeRenderer:
         """Dispatcher method that calls another render method depending on whether the path is a directory or a file"""
 
         rel_path = self._template_path / file_name
-        if rel_path in self._context.excluded:
+        if rel_path in self._context.exclude:
             logger.debug('Excluded %s', rel_path)
             return
 
