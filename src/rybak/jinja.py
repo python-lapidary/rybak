@@ -32,7 +32,7 @@ class JinjaAdapter(RendererAdapter):
         else:
             if keep_trailing_newline is not None:
                 self._env = environment.overlay()
-                self._env.keep_trailing_newline = self._keep_trailing_newline
+                self._env.keep_trailing_newline = keep_trailing_newline
 
     def render_str(self, template: str, data: TemplateData, loop_over: Optional[LoopOverFn] = None) -> str:
         env = self._env.overlay()
