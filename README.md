@@ -1,13 +1,16 @@
 # Rybak
+
 _/ˈrɨ.bak/_
 
 Directory-tree generator library.
 
 ## Synopsis
 
-Rybak is an extension of template engines, which instead of rendering a single file or string, renders a whole directory.
+Rybak is an extension of template engines, which instead of rendering a single file or string, renders a whole
+directory.
 
-In a way it's similar to [Cookiecutter](https://pypi.org/project/cookiecutter/) or [Copier](https://pypi.org/project/copier/), but while these programs are designed specifically for generating
+In a way it's similar to [Cookiecutter](https://pypi.org/project/cookiecutter/)
+or [Copier](https://pypi.org/project/copier/), but while these programs are designed specifically for generating
 software projects, while Rybak is a library for generating arbitrary directory tree structures.
 
 Rybak template is a directory consisting of template files.
@@ -39,15 +42,16 @@ render(
     JinjaAdapter(loader=FileSystemLoader('template_root')),
     {'likes': {
         'Alice': 'Bob',
-      'Bob': 'Charlie',
-      'Charlie': 'cats',
+        'Bob': 'Charlie',
+        'Charlie': 'cats',
     }},
     Path('target_root'),
 )
 ```
 
 - `template_root`:
-  is the directory containing template files, in this case Jinja templates. Templates can be used in file content, file names and directory names.
+  is the directory containing template files, in this case Jinja templates. Templates can be used in file content, file
+  names and directory names.
 
 - `model`:
   is the data structure used by the template. You can use here whatever the template accepts.
@@ -55,7 +59,8 @@ render(
 ### Single template multiple data
 
 Template files can be applied to collections of items.
-In order to do so, a special function is made available, `loop_over` that iterates over a passed collection. The function can only be used in templates in file names.
+In order to do so, a special function is made available, `loop_over` that iterates over a passed collection. The
+function can only be used in templates in file names.
 
 `loop_over` returns the element of the collection, so that it can be used to render name.
 
@@ -75,7 +80,8 @@ would produce three files: Alice, Bob and Charlie.
 
 The current item is also available during rendering the file contents, as model variable `item`.
 
-Of course, we might want different value in the file name and its content. For that we can manipulate the `loop_over`s result:
+Of course, we might want different value in the file name and its content. For that we can manipulate the `loop_over`s
+result:
 
 model:
 
@@ -107,11 +113,13 @@ likes = [
 ]
 ```
 
-In this case the file name template simplifies to `{{loop_over(likes).name}}` and the content template to `{{item.likes}}`.
+In this case the file name template simplifies to `{{loop_over(likes).name}}` and the content template
+to `{{item.likes}}`.
 
 ## Installation
 
-Rybak templates can work with either of Jinja, Mako or Torado; so typically you need to install Rybak and one of those libraries.
+Rybak templates can work with either of Jinja, Mako or Torado; so typically you need to install Rybak and one of those
+libraries.
 
 installing `rybak[jinja]` or `rybak[mako]` will handle this.
 
