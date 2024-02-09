@@ -15,8 +15,6 @@ jobs:
       matrix:
         os:
         - Ubuntu
-        - macOS
-        - Windows
         python-version:
         - "3.8"
         - "3.9"
@@ -24,12 +22,20 @@ jobs:
         - "3.11"
         - "3.12"
         include:
-          - os: Ubuntu
-            image: ubuntu-latest
-          - os: Windows
-            image: windows-latest
-          - os: macOS
-            image: macos-latest
+        - os: Ubuntu
+          image: ubuntu-latest
+        - os: Windows
+          image: windows-latest
+          python-version: "3.8"
+        - os: Windows
+          image: windows-latest
+          python-version: "3.12"
+        - os: macOS
+          image: macos-latest
+          python-version: "3.8"
+        - os: macOS
+          image: macos-latest
+          python-version: "3.12"
       fail-fast: false
     defaults:
       run:
