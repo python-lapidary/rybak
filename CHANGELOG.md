@@ -1,6 +1,12 @@
 # Changelog
 
-## [Unreleased]
+# 0.2.1 - 2023-12-27
+
+### Fixed
+
+- Fix configuring JinjaAdapter when an instance of Environment is passed.
+
+## 0.2.0 - 2023-12-27
 
 ### Changed
 
