@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "rybak"
 version = "0.2.0"
-description = "Project generator"
+description = "Directory-tree generator library"
 authors = ["Raphael Krupinski <10319569-mattesilver@users.noreply.gitlab.com>"]
 readme = "README.md"
 packages = [{ include = "rybak", from = "src" }]
