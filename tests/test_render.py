@@ -1,3 +1,4 @@
+import sys
 from itertools import product
 from pathlib import Path
 from typing import Any, Callable, Iterable, Mapping, NamedTuple, Optional
@@ -95,6 +96,9 @@ def test_render(
     excluded: Iterable,
     tmp_path: Path,
 ) -> None:
+    if adapter_name == 'mako' and sys.platform == 'win32':
+        pytest.skip('Mako has problem with line endings on windows')
+
     root = Path(__file__).parent / 'test_render'
     target_path = tmp_path / f'{adapter_name}_{test_name}'
     target_path.mkdir()
