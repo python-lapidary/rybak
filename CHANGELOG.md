@@ -2,9 +2,13 @@
 
 # [Unreleased]
 
+### Changed
+
+- Re-licensed as BSD 3-Clause.
+
 ### Added
 
-- Add parameter type to the TypeError when it's not an Iterable
+- Add parameter type to the TypeError when it's not an Iterable.
 
 ### Fixed
 
