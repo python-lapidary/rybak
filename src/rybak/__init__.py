@@ -6,11 +6,15 @@ __all__ = [
 
 from itertools import chain
 from pathlib import Path, PurePath
-from typing import Iterable, Union
+from typing import Any, Iterable, Union
 
-from ._types import RenderError, TemplateData
+from ._types import RenderError, ReportCallbackFn, TemplateData
 from .adapter import RendererAdapter
 from .tree_renderer import RenderContext, TreeRenderer
+
+
+def _noop_report_cb(*_: Any) -> None:
+    pass
 
 
 def render(
@@ -21,6 +25,7 @@ def render(
     exclude: Union[Iterable[Path], Iterable[str]] = ('__pycache__',),
     exclude_extend: Union[Iterable[Path], Iterable[str]] = (),
     remove_suffixes: Iterable[str] = (),
+    report_cb: ReportCallbackFn = _noop_report_cb,
 ) -> None:
     """Render a directory-tree from a template and a data dictionary
 
@@ -38,6 +43,7 @@ def render(
             target_root=target_root,
             exclude=exclude_paths,
             remove_suffixes=remove_suffixes,
+            report_cb=report_cb,
         ),
         PurePath(),
         Path(),

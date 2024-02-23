@@ -5,7 +5,7 @@ from functools import cached_property
 from pathlib import Path, PurePath
 from typing import Iterable, NoReturn
 
-from ._types import LoopOverFn, RenderFn, TemplateData
+from ._types import LoopOverFn, RenderFn, ReportCallbackFn, TemplateData
 from .adapter import RendererAdapter
 from .pycompat import Traversable
 
@@ -36,6 +36,7 @@ class RenderContext:
     adapter: RendererAdapter
     exclude: Iterable[PurePath]
     remove_suffixes: Iterable[str]
+    report_cb: ReportCallbackFn
 
 
 class TreeRenderer:
@@ -110,12 +111,16 @@ class TreeRenderer:
         return target_name
 
     def _render_file(self, template_name: str, target_name: str, data: TemplateData) -> None:
-        logger.debug('Render to file %s', self._target_path / target_name)
-        target_path = self._full_target_path / target_name
-        target_path.parent.mkdir(parents=True, exist_ok=True)
+        source = self._template_path / template_name
+        target = self._target_path / target_name
+        target_full = self._context.target_root / target
+        target_full.parent.mkdir(parents=True, exist_ok=True)
+
+        self._context.report_cb(source, target)
+
         self._context.adapter.render_file(
-            (self._template_path / template_name).as_posix(),
-            target_path,
+            source.as_posix(),
+            target_full,
             data,
         )
 

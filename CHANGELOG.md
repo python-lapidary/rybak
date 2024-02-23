@@ -8,7 +8,8 @@
 
 ### Added
 
-- Add parameter type to the TypeError when it's not an Iterable.
+- Add parameter type to the TypeError thrown when the input is not Iterable.
+- Accept a report callback, called for every written file.
 
 ### Fixed
 
