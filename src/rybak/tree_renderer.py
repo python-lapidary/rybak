@@ -130,8 +130,8 @@ class TreeRenderer:
         )
 
     def remove_stale(self) -> None:
-        for path, _, files in self._context.target_root.walk(False):
-            existing_dir_path = path.relative_to(self._context.target_root)
+        for path, _, files in os.walk(self._context.target_root, False):
+            existing_dir_path = Path(path).relative_to(self._context.target_root)
             removed_files: MutableSet[str] = set()
 
             for file_name in files:
