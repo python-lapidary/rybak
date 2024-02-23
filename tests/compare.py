@@ -1,4 +1,6 @@
+from collections.abc import Iterable
 from pathlib import Path
+from typing import Optional
 
 
 def cmp_dirs(expected: Path, actual: Path) -> None:
@@ -25,3 +27,9 @@ def cmp_dirs(expected: Path, actual: Path) -> None:
             assert expected_text == actual_text, f'"{expected_text}" != "{actual_text}"'
         else:
             raise TypeError('Neither a file nor a directory', expected_path)
+
+
+def dir_content(root: Path) -> Iterable[tuple[str, Optional[str]]]:
+    return sorted(
+        (str(path.relative_to(root)), path.read_text() if path.is_file() else None) for path in root.rglob('*')
+    )

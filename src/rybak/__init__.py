@@ -6,7 +6,7 @@ __all__ = [
 
 from itertools import chain
 from pathlib import Path, PurePath
-from typing import Any, Iterable, Union
+from typing import Any, Iterable, Union, cast
 
 from ._types import RenderError, ReportCallbackFn, TemplateData
 from .adapter import RendererAdapter
@@ -24,6 +24,7 @@ def render(
     *,
     exclude: Union[Iterable[Path], Iterable[str]] = ('__pycache__',),
     exclude_extend: Union[Iterable[Path], Iterable[str]] = (),
+    remove_stale: bool = False,
     remove_suffixes: Iterable[str] = (),
     report_cb: ReportCallbackFn = _noop_report_cb,
 ) -> None:
@@ -34,11 +35,13 @@ def render(
     :param data: template data
     :param exclude: paths within the template root directory, which are not templates. Defaults to '__pycache__'
     :param exclude_extend: paths to be added to the default exclude list.
+    :param remove_stale: remove files and directories that were found in the target directory, but not rendered in this
+           run.
     :param remove_suffixes: filename suffixes to be removed when rendering file names, in `.suffix` format
     :param report_cb: callback function called with source and target paths for every written file
     """
-    exclude_paths = {Path(path) for path in chain(exclude, exclude_extend)}
-    TreeRenderer(
+    exclude_paths = {Path(path) for path in cast(Iterable[Path], chain(exclude, exclude_extend))}
+    tree_renderer = TreeRenderer(
         RenderContext(
             adapter=adapter,
             target_root=target_root,
@@ -48,4 +51,8 @@ def render(
         ),
         PurePath(),
         Path(),
-    ).render(data)
+    )
+    tree_renderer.render(data)
+
+    if remove_stale:
+        tree_renderer.remove_stale()

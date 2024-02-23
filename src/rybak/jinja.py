@@ -28,7 +28,7 @@ class JinjaAdapter(RendererAdapter):
             raise ValueError('Either environment or loader is required')
 
         if not environment:
-            self._env = jinja2.Environment(loader=loader, keep_trailing_newline=keep_trailing_newline)
+            self._env = jinja2.Environment(loader=loader, keep_trailing_newline=keep_trailing_newline or True)
         else:
             if keep_trailing_newline is not None:
                 self._env = environment.overlay()
@@ -49,7 +49,7 @@ class JinjaAdapter(RendererAdapter):
             template_obj = self._env.get_template(template_path)
             text = template_obj.render(**data)
         except (jinja2.TemplateError, ValueError) as e:
-            raise RenderError from e
+            raise RenderError(template_path, target_file) from e
         target_file.write_text(text)
 
     @property

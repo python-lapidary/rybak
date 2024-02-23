@@ -1,6 +1,7 @@
 import dataclasses
 import logging
 import os.path
+from collections.abc import MutableSet
 from functools import cached_property
 from pathlib import Path, PurePath
 from typing import Iterable, NoReturn
@@ -37,6 +38,9 @@ class RenderContext:
     exclude: Iterable[PurePath]
     remove_suffixes: Iterable[str]
     report_cb: ReportCallbackFn
+
+    def __post_init__(self) -> None:
+        self.all_files: MutableSet[Path] = set()
 
 
 class TreeRenderer:
@@ -116,6 +120,7 @@ class TreeRenderer:
         target_full = self._context.target_root / target
         target_full.parent.mkdir(parents=True, exist_ok=True)
 
+        self._context.all_files.add(target)
         self._context.report_cb(source, target)
 
         self._context.adapter.render_file(
@@ -123,6 +128,21 @@ class TreeRenderer:
             target_full,
             data,
         )
+
+    def remove_stale(self) -> None:
+        for path, _, files in self._context.target_root.walk(False):
+            existing_dir_path = path.relative_to(self._context.target_root)
+            removed_files: MutableSet[str] = set()
+
+            for file_name in files:
+                file_path = existing_dir_path / file_name
+
+                if file_path not in self._context.all_files:
+                    removed_files.add(file_name)
+                    (self._context.target_root / file_path).unlink()
+
+            if not files or set(files) == removed_files:
+                Path(path).rmdir()
 
     def _with_subdir(self, template_name: str, target_name: str) -> 'TreeRenderer':
         return TreeRenderer(self._context, self._template_path / template_name, self._target_path / target_name)
