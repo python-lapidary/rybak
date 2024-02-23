@@ -35,6 +35,7 @@ def render(
     :param exclude: paths within the template root directory, which are not templates. Defaults to '__pycache__'
     :param exclude_extend: paths to be added to the default exclude list.
     :param remove_suffixes: filename suffixes to be removed when rendering file names, in `.suffix` format
+    :param report_cb: callback function called with source and target paths for every written file
     """
     exclude_paths = {Path(path) for path in chain(exclude, exclude_extend)}
     TreeRenderer(
