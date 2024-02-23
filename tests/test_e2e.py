@@ -11,7 +11,7 @@ from rybak.adapter import RendererAdapter
 from rybak.jinja import JinjaAdapter
 from rybak.mako import MakoAdapter
 
-from tests.compare import cmp_dirs
+from .compare import dir_content
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -122,4 +122,4 @@ def test_render(
             fn()
     else:
         fn()
-        cmp_dirs(root / 'output' / test_name, target_path)
+        assert dir_content(root / 'output' / test_name) == dir_content(target_path)
