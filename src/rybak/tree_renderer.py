@@ -26,7 +26,7 @@ def loop_over(items: Iterable) -> NoReturn:
     if isinstance(items, str):
         raise TypeError('Expected an Iterable other than str')
     if not isinstance(items, Iterable):
-        raise TypeError('Expected an Iterable')
+        raise TypeError('Expected an Iterable', type(items))
     raise StartIteration(items)
 
 
@@ -94,7 +94,6 @@ class TreeRenderer:
 
         if target_path.exists() and not target_path.is_dir():
             target_path.unlink()
-        target_path.mkdir(exist_ok=True)
 
         self._with_subdir(template_name, target_name).render(data)
 

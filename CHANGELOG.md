@@ -1,12 +1,22 @@
 # Changelog
 
-# 0.2.1 - 2023-12-27
+# [Unreleased]
+
+### Added
+
+- Add parameter type to the TypeError when it's not an Iterable
+
+### Fixed
+
+- Create parent directories
+
+# 0.2.1 - 2024-02-09
 
 ### Fixed
 
 - Fix configuring JinjaAdapter when an instance of Environment is passed.
 
-## 0.2.0 - 2023-12-27
+## 0.2.0 - 2024-02-09
 
 ### Changed
 
