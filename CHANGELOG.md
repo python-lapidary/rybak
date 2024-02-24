@@ -5,6 +5,7 @@
 ### Changed
 
 - Re-licensed as BSD 3-Clause.
+- Deprecated the `render` function in favour of the new `TreeTemplate.render`.
 
 ### Added
 

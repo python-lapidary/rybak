@@ -9,19 +9,21 @@ Directory-tree generator library.
 Rybak is an extension of template engines, which instead of rendering a single file or string, renders a whole
 directory.
 
-In a way it's similar to [Cookiecutter](https://pypi.org/project/cookiecutter/)
-or [Copier](https://pypi.org/project/copier/), but while these programs are designed specifically for generating
-software projects, while Rybak is a library for generating arbitrary directory tree structures.
+In a way it's similar to
+[Cookiecutter](https://pypi.org/project/cookiecutter/) or
+[Copier](https://pypi.org/project/copier/),
+but while these programs are designed specifically for generating software projects scaffolding,
+Rybak is a library for generating arbitrary directory tree structures.
 
 Rybak template is a directory consisting of template files.
-[Jinja](https://pypi.org/project/jinja2/),
-and [Mako](https://pypi.org/project/mako/)
+[Jinja](https://pypi.org/project/jinja2/), and
+[Mako](https://pypi.org/project/mako/)
 are supported, though one project can only use a single template engine.
 
 Goals:
 
 - [x] generate directory-tree based on a user-provided template and data,
-- [ ] keep track and remove files that aren't produced by the template, but accept path patterns to keep,
+- [x] keep track and remove files that aren't produced by the template,
 - [x] allow for multiple files to be generated from a single template file,
 - [ ] support but don't require templates to be git or other DCVS repositories.
 
@@ -34,12 +36,13 @@ Non-goals:
 
 ```python
 from pathlib import Path
-from rybak import render
+from rybak import TreeTemplate
 from rybak.jinja import JinjaAdapter
 from jinja2.loaders import FileSystemLoader
 
-render(
+TreeTemplate(
     JinjaAdapter(loader=FileSystemLoader('template_root')),
+).render(
     {'likes': {
         'Alice': 'Bob',
         'Bob': 'Charlie',
@@ -52,9 +55,6 @@ render(
 - `template_root`:
   is the directory containing template files, in this case Jinja templates. Templates can be used in file content, file
   names and directory names.
-
-- `model`:
-  is the data structure used by the template. You can use here whatever the template accepts.
 
 ### Single template multiple data
 

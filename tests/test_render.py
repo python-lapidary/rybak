@@ -1,9 +1,11 @@
 import pathlib
+from typing import Optional, Set, Tuple
 
 import jinja2
 import rybak
 import rybak.jinja
-from compare import dir_content
+
+from .compare import dir_content
 
 data = dict(
     tmpl_dir='target_dir',
@@ -19,35 +21,36 @@ data = dict(
 
 
 def test_callback(tmp_path: pathlib.Path):
-    logs = set()
+    logs: Set[Tuple[Optional[str], str]] = set()
 
     class ReportingEventSink(rybak.EventSink):
         def writing_file(self, template: pathlib.PurePath, target: pathlib.Path) -> None:
-            logs.add((template, target))
+            logs.add((str(template), str(target)))
 
         def unlinking_file(self, target: pathlib.Path) -> None:
-            logs.add((None, target))
+            logs.add((None, str(target)))
 
     (tmp_path / 'stale_file.txt').write_text('test file')
 
     template_root = pathlib.Path(__file__).parent / 'test_e2e' / 'templates' / 'jinja' / 'simple'
 
-    rybak.render(
+    rybak.TreeTemplate(
         rybak.jinja.JinjaAdapter(loader=jinja2.FileSystemLoader(template_root)),
+        remove_suffixes=['.jinja'],
+    ).render(
         data,
         tmp_path,
-        remove_suffixes=['.jinja'],
         event_sink=ReportingEventSink(),
         remove_stale=True,
     )
 
     assert logs == {
-        (None, pathlib.PosixPath('stale_file.txt')),
-        (pathlib.PurePath('{{tmpl_file1}}'), pathlib.Path('file1.txt')),
-        (pathlib.PurePath('{{tmpl_file3}}'), pathlib.Path('subdir/file3.txt')),
-        (pathlib.PurePath('{{tmpl_dir}}/excluded_file.txt'), pathlib.Path('target_dir/excluded_file.txt')),
-        (pathlib.PurePath('{{tmpl_dir}}/suffixed.txt.jinja'), pathlib.Path('target_dir/suffixed.txt')),
-        (pathlib.PurePath('{{tmpl_dir}}/{{tmpl_file2}}'), pathlib.Path('target_dir/file2.txt')),
+        (None, 'stale_file.txt'),
+        ('{{tmpl_file1}}', 'file1.txt'),
+        ('{{tmpl_file3}}', 'subdir/file3.txt'),
+        ('{{tmpl_dir}}/excluded_file.txt', 'target_dir/excluded_file.txt'),
+        ('{{tmpl_dir}}/suffixed.txt.jinja', 'target_dir/suffixed.txt'),
+        ('{{tmpl_dir}}/{{tmpl_file2}}', 'target_dir/file2.txt'),
     }
 
 
@@ -60,12 +63,13 @@ def test_remove_stale(tmp_path: pathlib.Path):
     stale_dir.mkdir()
     (stale_dir / 'stale_file.txt').write_text('another test file')
 
-    rybak.render(
+    rybak.TreeTemplate(
         rybak.jinja.JinjaAdapter(loader=jinja2.FileSystemLoader(template_root)),
-        data,
-        tmp_path,
         exclude_extend=['{{tmpl_dir}}/excluded_file.txt'],
         remove_suffixes=['.jinja'],
+    ).render(
+        data,
+        tmp_path,
         remove_stale=True,
     )
 
@@ -81,12 +85,13 @@ def test_no_remove_stale(tmp_path: pathlib.Path):
     stale_dir.mkdir()
     (stale_dir / 'stale_file.txt').write_text('another test file')
 
-    rybak.render(
+    rybak.TreeTemplate(
         rybak.jinja.JinjaAdapter(loader=jinja2.FileSystemLoader(template_root)),
-        data,
-        tmp_path,
         exclude_extend=['{{tmpl_dir}}/excluded_file.txt'],
         remove_suffixes=['.jinja'],
+    ).render(
+        data,
+        tmp_path,
         remove_stale=False,
     )
 

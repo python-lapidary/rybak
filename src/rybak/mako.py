@@ -10,8 +10,8 @@ import mako.exceptions  # type: ignore[import-untyped]
 import mako.lookup
 import mako.template
 
-from ._types import LoopOverFn, RenderError, TemplateData
-from .adapter import RendererAdapter
+from ._types import LoopOverFn, TemplateData
+from .adapter import RendererAdapter, RenderError
 from .pycompat import Traversable
 
 
@@ -23,15 +23,15 @@ class MakoAdapter(RendererAdapter):
         try:
             template_obj = str_template(template)
             return template_obj.render(**data, loop_over=loop_over)
-        except (AttributeError, mako.exceptions.MakoException, ValueError) as e:
-            raise RenderError from e
+        except (AttributeError, mako.exceptions.MakoException, ValueError, TypeError) as e:
+            raise RenderError(template) from e
 
     def render_file(self, template_path: str, target_file: Path, data: TemplateData) -> None:
         try:
             template = self._loader.get_template(template_path)
             text = template.render(**data)
         except (AttributeError, mako.exceptions.MakoException, ValueError) as e:
-            raise RenderError from e
+            raise RenderError(template_path, target_file) from e
         target_file.write_text(text)
 
     @property

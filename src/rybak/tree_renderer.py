@@ -1,22 +1,23 @@
 import dataclasses
+import itertools
 import logging
 import os.path
-from collections.abc import MutableSet
-from functools import cached_property
 from pathlib import Path, PurePath
-from typing import Iterable, NoReturn
+from typing import Any, Container, Iterable, Iterator, MutableSet, NoReturn, Optional, Tuple, Union, cast
 
-from ._types import LoopOverFn, RenderFn, TemplateData
+from ._types import LoopOverFn, TemplateData
 from .adapter import RendererAdapter
 from .events import EventSink
 from .pycompat import Traversable
 
 logger = logging.getLogger(__name__)
 
+_noop_event_sink = EventSink()
+
 
 class StartIteration(Exception):  # noqa: N818
     """
-    Helper exception for loop_over template function. When raised, renderer will iterate over the items.
+    Helper exception for `loop_over` template function. When raised, renderer will iterate over the items.
     Deliberately named after StopIteration.
     """
 
@@ -34,125 +35,182 @@ def loop_over(items: Iterable) -> NoReturn:
 
 @dataclasses.dataclass
 class RenderContext:
-    target_root: Path
-    adapter: RendererAdapter
-    exclude: Iterable[PurePath]
-    remove_suffixes: Iterable[str]
-    event_sink: EventSink
+    """Holds context for rendering a single file or directory"""
 
-    def __post_init__(self) -> None:
-        self.all_files: MutableSet[Path] = set()
+    template_path: PurePath
+    target_path: Path
+    session: 'Session'
+    data: TemplateData
 
+    def with_child(self, template_name: str, target_name: str, data: Optional[TemplateData]) -> 'RenderContext':
+        """Create a child context. Pass on the render session."""
+        return RenderContext(
+            self.template_path / template_name, self.target_path / target_name, self.session, data or self.data
+        )
 
-class TreeRenderer:
-    def __init__(self, context: RenderContext, template_path: PurePath, target_path: Path) -> None:
-        self._context = context
-        self._template_path = template_path
-        self._target_path = target_path
+    def _render(self) -> None:
+        """Render files and directories in ctx.template_path into ctx.target_path"""
 
-    def render(self, data: TemplateData):
-        for child in self._full_template_path.iterdir():
-            self._render(child.name, data)
+        for child in self.full_template_path.iterdir():
+            self._render_child(child.name)
 
-    def _render(self, file_name: str, data: TemplateData) -> None:
+    def _render_child(self, file_name: str) -> None:
         """Dispatcher method that calls another render method depending on whether the path is a directory or a file"""
 
-        rel_path = self._template_path / file_name
-        if rel_path in self._context.exclude:
+        rel_path = self.template_path / file_name
+        if rel_path in self.session.template._exclude:
             logger.debug('Excluded %s', rel_path)
             return
 
-        path = self._context.adapter.template_root / rel_path
+        logger.debug('Render from %s', rel_path)
+
+        path = self.full_template_path / file_name
         if path.is_dir():
-            render_single = self._render_dir
+            render_single = RenderContext._render_dir
         else:
-            render_single = self._render_file
+            render_single = RenderContext._render_file
 
-        self._render_all(file_name, data, render_single)
+        for target_name, item in self.render_names(file_name, self.data):
+            data_child = {**self.data, 'item': item} if item else self.data
+            render_single(self.with_child(file_name, target_name, data_child))
 
-    def _render_all(self, template_name: str, data: TemplateData, render_single: RenderFn):
-        template_path = self._template_path / template_name
-        logger.debug('Render from %s', template_path)
+    def render_names(self, template_name: str, data: TemplateData) -> Iterator[Tuple[str, Any]]:
+        """Produce zero or more target names for a given template file name"""
 
         try:
-            target_name = self._render_file_name(template_name, data, loop_over)
+            target_name = self.session.template._render_file_name(template_name, data, loop_over)
             if not target_name:
                 logger.info('Skipping, template file name evaluated to empty value')
                 return
-            render_single(template_name, target_name, data)
+            yield target_name, None
         except StartIteration as e:
             items = e.items
         else:
             items = ()
 
         for item in items:
-            target_name = self._render_file_name(template_name, data, lambda _: item)  # noqa: B023
+            target_name = self.session.template._render_file_name(template_name, data, lambda _: item)  # noqa: B023
             if not target_name:
                 logger.info('Skipping, template file name evaluated to empty value')
                 continue
-            render_single(template_name, target_name, {**data, 'item': item})
+            yield target_name, item
 
-    def _render_dir(self, template_name: str, target_name: str, data: TemplateData):
+    def _render_dir(self) -> None:
         """Make sure output directory exists and render all children of the template (sub)directory"""
-        logger.debug('Render to dir %s', self._target_path / target_name)
+        logger.debug('Render to dir %s', self.target_path)
 
-        target_path = self._full_target_path / target_name
-
+        target_path = self.full_target_path
         if target_path.exists() and not target_path.is_dir():
             target_path.unlink()
 
-        self._with_subdir(template_name, target_name).render(data)
+        self._render()
 
-    def _render_file_name(self, template: str, data: TemplateData, loop_over_: LoopOverFn) -> str:
-        if self._context.remove_suffixes:
-            root, ext = os.path.splitext(template)
-            if ext in self._context.remove_suffixes:
+    def _render_file(self) -> None:
+        logger.debug('Render to file %s', self.target_path)
+        self.session.writing_file(self.template_path, self.target_path)
+        self.session.template._render_file(self.template_path, self.full_target_path, self.data)
+
+    @property
+    def full_target_path(self) -> Path:
+        return self.session.target_root / self.target_path
+
+    @property
+    def full_template_path(self) -> Traversable:
+        return self.session.template.template_root / self.template_path
+
+
+class TreeTemplate:
+    def __init__(
+        self,
+        adapter: RendererAdapter,
+        *,
+        remove_suffixes: Container[str] = (),
+        exclude: Union[Iterable[str], Iterable[PurePath]] = ('__pycache__',),
+        exclude_extend: Union[Iterable[str], Iterable[PurePath]] = (),
+    ) -> None:
+        self._adapter = adapter
+        self._remove_suffixes = remove_suffixes
+        self._exclude = [
+            PurePath(cast(Union[str, PurePath], path)) for path in itertools.chain(exclude, exclude_extend)
+        ]
+
+    def render(
+        self,
+        data: TemplateData,
+        target_root: Path,
+        *,
+        event_sink: EventSink = _noop_event_sink,
+        remove_stale: bool = False,
+    ) -> None:
+        session = Session(
+            self,
+            target_root,
+            set(),
+            event_sink,
+        )
+        ctx = RenderContext(
+            PurePath(),
+            Path(),
+            session,
+            data,
+        )
+        ctx._render()
+
+        # Removing stale files is done at the end since rendered file names can be whole paths, so it's hard to say
+        # that a given file will not be rendered or directory will end up empty until all template files has been
+        # processed
+        if remove_stale:
+            session.remove_stale()
+
+    def _render_file_name(self, template: str, data: TemplateData, loop_over: LoopOverFn) -> str:
+        if self._remove_suffixes:
+            root, suffix = os.path.splitext(template)
+            if suffix in self._remove_suffixes:
                 template = root
-        target_name = self._context.adapter.render_str(
+        return self._adapter.render_str(
             template,
             data,
-            loop_over_,
+            loop_over,
         )
-        return target_name
 
-    def _render_file(self, template_name: str, target_name: str, data: TemplateData) -> None:
-        source = self._template_path / template_name
-        target = self._target_path / target_name
-        target_full = self._context.target_root / target
-        target_full.parent.mkdir(parents=True, exist_ok=True)
+    def _render_file(self, template_path: PurePath, target_path: Path, data: TemplateData) -> None:
+        target_path.parent.mkdir(parents=True, exist_ok=True)
 
-        self._context.all_files.add(target)
-        self._context.event_sink.writing_file(source, target)
-
-        self._context.adapter.render_file(
-            source.as_posix(),
-            target_full,
+        self._adapter.render_file(
+            template_path.as_posix(),
+            target_path,
             data,
         )
 
+    @property
+    def template_root(self) -> PurePath:
+        return self._adapter.template_root
+
+
+@dataclasses.dataclass
+class Session:
+    template: 'TreeTemplate'
+    target_root: Path
+    files_written: MutableSet[Path]
+    event_sink: EventSink
+
     def remove_stale(self) -> None:
-        for path, _, files in os.walk(self._context.target_root, False):
-            existing_dir_path = Path(path).relative_to(self._context.target_root)
+        for path, _, files in os.walk(self.target_root, False):
+            path_ = Path(path)
+            existing_dir_path = path_.relative_to(self.target_root)
             removed_files: MutableSet[str] = set()
 
             for file_name in files:
                 file_path = existing_dir_path / file_name
 
-                if file_path not in self._context.all_files:
-                    self._context.event_sink.unlinking_file(file_path)
+                if file_path not in self.files_written:
+                    self.event_sink.unlinking_file(file_path)
                     removed_files.add(file_name)
-                    (self._context.target_root / file_path).unlink()
+                    (self.target_root / file_path).unlink()
 
             if not files or set(files) == removed_files:
-                Path(path).rmdir()
+                path_.rmdir()
 
-    def _with_subdir(self, template_name: str, target_name: str) -> 'TreeRenderer':
-        return TreeRenderer(self._context, self._template_path / template_name, self._target_path / target_name)
-
-    @cached_property
-    def _full_template_path(self) -> Traversable:
-        return self._context.adapter.template_root / str(self._template_path)
-
-    @cached_property
-    def _full_target_path(self) -> Path:
-        return self._context.target_root / self._target_path
+    def writing_file(self, template: PurePath, target: Path) -> None:
+        self.files_written.add(target)
+        self.event_sink.writing_file(template, target)

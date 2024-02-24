@@ -3,8 +3,8 @@ from typing import Optional, cast
 
 import jinja2
 
-from ._types import LoopOverFn, RenderError, TemplateData
-from .adapter import RendererAdapter
+from ._types import LoopOverFn, TemplateData
+from .adapter import RendererAdapter, RenderError
 from .pycompat import Traversable, files
 
 
@@ -42,7 +42,7 @@ class JinjaAdapter(RendererAdapter):
             template_obj = env.from_string(template)
             return template_obj.render(**data)
         except (jinja2.TemplateError, ValueError) as e:
-            raise RenderError from e
+            raise RenderError(template) from e
 
     def render_file(self, template_path: str, target_file: Path, data: TemplateData) -> None:
         try:

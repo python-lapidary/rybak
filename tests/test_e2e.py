@@ -6,10 +6,9 @@ from typing import Any, Callable, Iterable, Mapping, NamedTuple, Optional
 
 import jinja2
 import pytest
-from rybak import LoggingEventSink, RenderError, render
-from rybak.adapter import RendererAdapter
-from rybak.jinja import JinjaAdapter
-from rybak.mako import MakoAdapter
+import rybak
+import rybak.jinja
+import rybak.mako
 
 from .compare import dir_content
 
@@ -76,8 +75,8 @@ e2e_test_data: Iterable[E2eTestData] = [
 ]
 
 adapters = {
-    'jinja': lambda template_root: JinjaAdapter(loader=jinja2.FileSystemLoader(template_root)),
-    'mako': MakoAdapter,
+    'jinja': lambda template_root: rybak.jinja.JinjaAdapter(loader=jinja2.FileSystemLoader(template_root)),
+    'mako': rybak.mako.MakoAdapter,
 }
 
 exclusions = {
@@ -93,7 +92,7 @@ adapter_test_data = [
 @pytest.mark.parametrize('adapter_name,adapter,test_name,data,error,exclude', adapter_test_data)
 def test_render(
     adapter_name: str,
-    adapter: Callable[[Path], RendererAdapter],
+    adapter: Callable[[Path], rybak.adapter.RendererAdapter],
     test_name: str,
     data: Mapping,
     error: bool,
@@ -108,18 +107,19 @@ def test_render(
     target_path.mkdir()
 
     def fn():
-        render(
+        rybak.TreeTemplate(
             adapter(root / 'templates' / adapter_name / test_name),
-            data,
-            target_path,
             exclude_extend=exclude,
             remove_suffixes=['.jinja', '.mako'],
-            event_sink=LoggingEventSink(logger, logging.DEBUG),
+        ).render(
+            data,
+            target_path,
+            event_sink=rybak.LoggingEventSink(logger, logging.DEBUG),
         )
 
     if error:
-        with pytest.raises(RenderError):
+        with pytest.raises(rybak.RenderError):
             fn()
     else:
         fn()
-        assert dir_content(root / 'output' / test_name) == dir_content(target_path)
+        assert dir_content(target_path) == dir_content(root / 'output' / test_name)

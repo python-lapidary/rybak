@@ -2,22 +2,22 @@ __all__ = [
     'EventSink',
     'LoggingEventSink',
     'RenderError',
-    'TreeRenderer',
+    'TreeTemplate',
     'render',
 ]
 
-from itertools import chain
-from pathlib import Path, PurePath
-from typing import Iterable, Union, cast
+from pathlib import Path
+from typing import Container, Iterable, Union
 
-from ._types import RenderError, TemplateData
-from .adapter import RendererAdapter
+from typing_extensions import deprecated
+
+from ._types import TemplateData
+from .adapter import RendererAdapter, RenderError
 from .events import EventSink, LoggingEventSink
-from .tree_renderer import RenderContext, TreeRenderer
-
-_noop_event_sink = EventSink()
+from .tree_renderer import TreeTemplate, _noop_event_sink
 
 
+@deprecated('For removal in 0.4. Use TreeTemplate.render')
 def render(
     adapter: RendererAdapter,
     data: TemplateData,
@@ -26,7 +26,7 @@ def render(
     exclude: Union[Iterable[Path], Iterable[str]] = ('__pycache__',),
     exclude_extend: Union[Iterable[Path], Iterable[str]] = (),
     remove_stale: bool = False,
-    remove_suffixes: Iterable[str] = (),
+    remove_suffixes: Container[str] = (),
     event_sink: EventSink = _noop_event_sink,
 ) -> None:
     """Render a directory-tree from a template and a data dictionary
@@ -41,19 +41,11 @@ def render(
     :param remove_suffixes: filename suffixes to be removed when rendering file names, in `.suffix` format
     :param event_sink: called when writing or removing files
     """
-    exclude_paths = {Path(path) for path in cast(Iterable[Path], chain(exclude, exclude_extend))}
-    tree_renderer = TreeRenderer(
-        RenderContext(
-            adapter=adapter,
-            target_root=target_root,
-            exclude=exclude_paths,
-            remove_suffixes=remove_suffixes,
-            event_sink=event_sink,
-        ),
-        PurePath(),
-        Path(),
-    )
-    tree_renderer.render(data)
 
-    if remove_stale:
-        tree_renderer.remove_stale()
+    template = TreeTemplate(
+        adapter,
+        remove_suffixes=remove_suffixes,
+        exclude=exclude,
+        exclude_extend=exclude_extend,
+    )
+    template.render(data, target_root, event_sink=event_sink, remove_stale=remove_stale)
