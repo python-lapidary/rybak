@@ -21,8 +21,14 @@ data = dict(
 def test_callback(tmp_path: pathlib.Path):
     logs = set()
 
-    def report_fb(source: pathlib.PurePath, target: pathlib.Path) -> None:
-        logs.add((source, target))
+    class ReportingEventSink(rybak.EventSink):
+        def writing_file(self, template: pathlib.PurePath, target: pathlib.Path) -> None:
+            logs.add((template, target))
+
+        def unlinking_file(self, target: pathlib.Path) -> None:
+            logs.add((None, target))
+
+    (tmp_path / 'stale_file.txt').write_text('test file')
 
     template_root = pathlib.Path(__file__).parent / 'test_e2e' / 'templates' / 'jinja' / 'simple'
 
@@ -31,10 +37,12 @@ def test_callback(tmp_path: pathlib.Path):
         data,
         tmp_path,
         remove_suffixes=['.jinja'],
-        report_cb=report_fb,
+        event_sink=ReportingEventSink(),
+        remove_stale=True,
     )
 
     assert logs == {
+        (None, pathlib.PosixPath('stale_file.txt')),
         (pathlib.PurePath('{{tmpl_file1}}'), pathlib.Path('file1.txt')),
         (pathlib.PurePath('{{tmpl_file3}}'), pathlib.Path('subdir/file3.txt')),
         (pathlib.PurePath('{{tmpl_dir}}/excluded_file.txt'), pathlib.Path('target_dir/excluded_file.txt')),

@@ -6,7 +6,7 @@ from typing import Any, Callable, Iterable, Mapping, NamedTuple, Optional
 
 import jinja2
 import pytest
-from rybak import RenderError, render
+from rybak import LoggingEventSink, RenderError, render
 from rybak.adapter import RendererAdapter
 from rybak.jinja import JinjaAdapter
 from rybak.mako import MakoAdapter
@@ -114,7 +114,7 @@ def test_render(
             target_path,
             exclude_extend=exclude,
             remove_suffixes=['.jinja', '.mako'],
-            report_cb=lambda _, target: logger.debug('Render to file %s', target),
+            event_sink=LoggingEventSink(logger, logging.DEBUG),
         )
 
     if error:

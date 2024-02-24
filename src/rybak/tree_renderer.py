@@ -6,8 +6,9 @@ from functools import cached_property
 from pathlib import Path, PurePath
 from typing import Iterable, NoReturn
 
-from ._types import LoopOverFn, RenderFn, ReportCallbackFn, TemplateData
+from ._types import LoopOverFn, RenderFn, TemplateData
 from .adapter import RendererAdapter
+from .events import EventSink
 from .pycompat import Traversable
 
 logger = logging.getLogger(__name__)
@@ -37,7 +38,7 @@ class RenderContext:
     adapter: RendererAdapter
     exclude: Iterable[PurePath]
     remove_suffixes: Iterable[str]
-    report_cb: ReportCallbackFn
+    event_sink: EventSink
 
     def __post_init__(self) -> None:
         self.all_files: MutableSet[Path] = set()
@@ -121,7 +122,7 @@ class TreeRenderer:
         target_full.parent.mkdir(parents=True, exist_ok=True)
 
         self._context.all_files.add(target)
-        self._context.report_cb(source, target)
+        self._context.event_sink.writing_file(source, target)
 
         self._context.adapter.render_file(
             source.as_posix(),
@@ -138,6 +139,7 @@ class TreeRenderer:
                 file_path = existing_dir_path / file_name
 
                 if file_path not in self._context.all_files:
+                    self._context.event_sink.unlinking_file(file_path)
                     removed_files.add(file_name)
                     (self._context.target_root / file_path).unlink()
 

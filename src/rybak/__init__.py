@@ -1,4 +1,6 @@
 __all__ = [
+    'EventSink',
+    'LoggingEventSink',
     'RenderError',
     'TreeRenderer',
     'render',
@@ -6,15 +8,14 @@ __all__ = [
 
 from itertools import chain
 from pathlib import Path, PurePath
-from typing import Any, Iterable, Union, cast
+from typing import Iterable, Union, cast
 
-from ._types import RenderError, ReportCallbackFn, TemplateData
+from ._types import RenderError, TemplateData
 from .adapter import RendererAdapter
+from .events import EventSink, LoggingEventSink
 from .tree_renderer import RenderContext, TreeRenderer
 
-
-def _noop_report_cb(*_: Any) -> None:
-    pass
+_noop_event_sink = EventSink()
 
 
 def render(
@@ -26,7 +27,7 @@ def render(
     exclude_extend: Union[Iterable[Path], Iterable[str]] = (),
     remove_stale: bool = False,
     remove_suffixes: Iterable[str] = (),
-    report_cb: ReportCallbackFn = _noop_report_cb,
+    event_sink: EventSink = _noop_event_sink,
 ) -> None:
     """Render a directory-tree from a template and a data dictionary
 
@@ -38,7 +39,7 @@ def render(
     :param remove_stale: remove files and directories that were found in the target directory, but not rendered in this
            run.
     :param remove_suffixes: filename suffixes to be removed when rendering file names, in `.suffix` format
-    :param report_cb: callback function called with source and target paths for every written file
+    :param event_sink: called when writing or removing files
     """
     exclude_paths = {Path(path) for path in cast(Iterable[Path], chain(exclude, exclude_extend))}
     tree_renderer = TreeRenderer(
@@ -47,7 +48,7 @@ def render(
             target_root=target_root,
             exclude=exclude_paths,
             remove_suffixes=remove_suffixes,
-            report_cb=report_cb,
+            event_sink=event_sink,
         ),
         PurePath(),
         Path(),
