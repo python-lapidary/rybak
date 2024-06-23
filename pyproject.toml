@@ -19,7 +19,6 @@ mako = ['mako']
 jinja = ['jinja2']
 
 [tool.poetry.group.dev.dependencies]
-mypy = "^1.8.0"
 pytest = "^8.0.0"
 
 
