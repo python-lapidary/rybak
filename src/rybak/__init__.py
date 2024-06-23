@@ -3,7 +3,6 @@ __all__ = [
     'LoggingEventSink',
     'RenderError',
     'TreeTemplate',
-    'render',
 ]
 
 from .adapter import RenderError
