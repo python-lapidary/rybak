@@ -145,7 +145,6 @@ class TreeTemplate:
         session = Session(
             self,
             target_root,
-            set(),
             event_sink,
         )
         ctx = RenderContext(
@@ -191,26 +190,27 @@ class TreeTemplate:
 class Session:
     template: 'TreeTemplate'
     target_root: Path
-    files_written: MutableSet[Path]
     event_sink: EventSink
+    _files_written: MutableSet[Path] = dataclasses.field(default_factory=set)
 
     def remove_stale(self) -> None:
-        for path, _, files in os.walk(self.target_root, False):
-            path_ = Path(path)
-            existing_dir_path = path_.relative_to(self.target_root)
+        for path_, dirs, files in os.walk(self.target_root, False):
+            path = Path(path_)
+            existing_dir_path = path.relative_to(self.target_root)
             removed_files: MutableSet[str] = set()
 
             for file_name in files:
                 file_path = existing_dir_path / file_name
 
-                if file_path not in self.files_written:
+                if file_path not in self._files_written:
                     self.event_sink.unlinking_file(file_path)
                     removed_files.add(file_name)
                     (self.target_root / file_path).unlink()
 
-            if not files or set(files) == removed_files:
-                path_.rmdir()
+            if path != self.target_root and not dirs and set(files) == removed_files:
+                self.event_sink.unlinking_file(path)
+                path.rmdir()
 
     def writing_file(self, template: PurePath, target: Path) -> None:
-        self.files_written.add(target)
+        self._files_written.add(target)
         self.event_sink.writing_file(template, target)
