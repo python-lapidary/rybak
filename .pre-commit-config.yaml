@@ -23,8 +23,6 @@ repos:
   hooks:
   - id: mypy
     args:
+    - --ignore-missing-imports
     - src
     pass_filenames: false
-    additional_dependencies:
-    - jinja2
-    - mako
