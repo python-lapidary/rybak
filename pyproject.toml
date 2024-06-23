@@ -44,17 +44,19 @@ exclude_lines = [
 
 
 [tool.ruff]
+line-length = 120
+target-version = 'py38'
+preview = true
+
+[tool.ruff.lint]
 extend-select = [
     'A', 'ANN0', 'B', 'BLE', 'C4', 'C90', 'COM818', 'E','FURB', 'I', 'N', 'PERF', 'PIE', 'PYI', 'RUF', 'S',
     'T10', 'T20', 'UP', 'W'
 ]
-line-length = 120
-target-version = 'py38'
 extend-ignore = [
     'S101', 'S701',
     'C408'
 ]
-preview = true
 
 [tool.ruff.format]
 quote-style = 'single'
