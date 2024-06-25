@@ -44,13 +44,12 @@ class JinjaAdapter(RendererAdapter):
         except (jinja2.TemplateError, ValueError) as e:
             raise RenderError(template) from e
 
-    def render_file(self, template_path: str, target_file: Path, data: TemplateData) -> None:
+    def render_file(self, template_path: str, data: TemplateData) -> str:
         try:
             template_obj = self._env.get_template(template_path)
-            text = template_obj.render(**data)
+            return template_obj.render(**data)
         except (jinja2.TemplateError, ValueError) as e:
-            raise RenderError(template_path, target_file) from e
-        target_file.write_text(text)
+            raise RenderError(template_path) from e
 
     @property
     def template_root(self) -> Traversable:

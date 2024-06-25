@@ -26,13 +26,12 @@ class MakoAdapter(RendererAdapter):
         except (AttributeError, mako.exceptions.MakoException, ValueError, TypeError) as e:
             raise RenderError(template) from e
 
-    def render_file(self, template_path: str, target_file: Path, data: TemplateData) -> None:
+    def render_file(self, template_path: str, data: TemplateData) -> str:
         try:
             template = self._loader.get_template(template_path)
-            text = template.render(**data)
+            return template.render(**data)
         except (AttributeError, mako.exceptions.MakoException, ValueError) as e:
-            raise RenderError(template_path, target_file) from e
-        target_file.write_text(text)
+            raise RenderError(template_path) from e
 
     @property
     def template_root(self) -> Traversable:

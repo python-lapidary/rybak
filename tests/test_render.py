@@ -73,7 +73,7 @@ def test_remove_stale(tmp_path: pathlib.Path):
         remove_stale=True,
     )
 
-    assert dir_content(root / 'output' / 'simple') == dir_content(tmp_path)
+    assert dir_content(tmp_path) == dir_content(root / 'output' / 'simple')
 
 
 def test_no_remove_stale(tmp_path: pathlib.Path):
@@ -95,4 +95,14 @@ def test_no_remove_stale(tmp_path: pathlib.Path):
         remove_stale=False,
     )
 
-    assert dir_content(root / 'output' / 'simple') != dir_content(tmp_path)
+    assert set(dir_content(tmp_path)) == {
+        ('file1.txt', 'foo'),
+        ('stale_dir', None),
+        ('stale_dir/stale_file.txt', 'another test file'),
+        ('stale_file.txt', 'test file'),
+        ('subdir', None),
+        ('subdir/file3.txt', 'baz'),
+        ('target_dir', None),
+        ('target_dir/file2.txt', 'bar'),
+        ('target_dir/suffixed.txt', 'test suffix removal\n'),
+    }

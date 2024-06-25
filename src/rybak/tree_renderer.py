@@ -175,11 +175,8 @@ class TreeTemplate:
     def _render_file(self, template_path: PurePath, target_path: Path, data: TemplateData) -> None:
         target_path.parent.mkdir(parents=True, exist_ok=True)
 
-        self._adapter.render_file(
-            template_path.as_posix(),
-            target_path,
-            data,
-        )
+        text = self._adapter.render_file(template_path.as_posix(), data)
+        target_path.write_text(text)
 
     @property
     def template_root(self) -> PurePath:
