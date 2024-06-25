@@ -60,7 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fix template file name resolution for Jinja on Windows. 
+- Fix template file name resolution for Jinja on Windows.
 - Don't try rendering file or directory if its name rendered empty.
 
 ## [0.1.0] - 2023-12-27
