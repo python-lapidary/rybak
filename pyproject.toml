@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rybak"
-version = "0.3.0"
+version = "0.4.0"
 description = "Directory-tree generator library"
 authors = ["Raphael Krupinski <10319569-mattesilver@users.noreply.gitlab.com>"]
 license = "BSD-3-Clause"
