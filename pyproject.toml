@@ -12,7 +12,7 @@ python = ">=3.8,<4.0"
 importlib-resources = { version = "^5", python = "<3.12" }
 jinja2 = { version = "^3", optional = true }
 mako = { version = "^1", optional = true }
-typing-extensions = {version = "^4.9", python = "<=3.9"}
+typing-extensions = {version = "^4.9", python = "<3.10"}
 
 [tool.poetry.extras]
 mako = ['mako']

@@ -251,4 +251,4 @@ mako = ["mako"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0"
-content-hash = "9805d4198182c479c4c97140036236388639130f77c3fc4c49cf69ad3c927ba8"
+content-hash = "38932c59d3a5fbe330fedda5b2852e7ca1a1957d70b35d8082491c533f08d5a8"
