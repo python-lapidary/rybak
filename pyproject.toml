@@ -9,7 +9,7 @@ packages = [{ include = "rybak", from = "src" }]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0"
-importlib-resources = { version = "^5", python = "<3.12" }
+importlib-resources = { version = ">=5,<7", python = "<3.12" }
 jinja2 = { version = "^3", optional = true }
 mako = { version = "^1", optional = true }
 typing-extensions = {version = "^4.9", python = "<3.10"}
