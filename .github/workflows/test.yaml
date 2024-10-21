@@ -16,26 +16,26 @@ jobs:
         os:
         - Ubuntu
         python-version:
-        - "3.8"
         - "3.9"
         - "3.10"
         - "3.11"
         - "3.12"
+        - "3.13"
         include:
         - os: Ubuntu
           image: ubuntu-latest
         - os: Windows
           image: windows-latest
-          python-version: "3.8"
+          python-version: "3.9"
         - os: Windows
           image: windows-latest
-          python-version: "3.12"
+          python-version: "3.13"
         - os: macOS
           image: macos-latest
-          python-version: "3.8"
+          python-version: "3.9"
         - os: macOS
           image: macos-latest
-          python-version: "3.12"
+          python-version: "3.13"
       fail-fast: false
     defaults:
       run:

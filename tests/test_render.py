@@ -1,5 +1,5 @@
 import pathlib
-from typing import Optional, Set, Tuple
+from typing import Optional
 
 import jinja2
 
@@ -22,7 +22,7 @@ data = dict(
 
 
 def test_callback(tmp_path: pathlib.Path):
-    logs: Set[Tuple[Optional[str], str]] = set()
+    logs: set[tuple[Optional[str], str]] = set()
 
     class ReportingEventSink(rybak.EventSink):
         def writing_file(self, template: pathlib.PurePath, target: pathlib.Path) -> None:

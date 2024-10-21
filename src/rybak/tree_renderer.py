@@ -2,8 +2,9 @@ import dataclasses
 import itertools
 import logging
 import os.path
+from collections.abc import Container, Iterable, Iterator, MutableSet
 from pathlib import Path, PurePath
-from typing import Any, Container, Iterable, Iterator, MutableSet, NoReturn, Optional, Tuple, Union, cast
+from typing import Any, NoReturn, Optional, Union, cast
 
 from ._types import LoopOverFn, TemplateData
 from .adapter import RendererAdapter
@@ -74,7 +75,7 @@ class RenderContext:
             data_child = {**self.data, 'item': item} if item else self.data
             render_single(self.with_child(file_name, target_name, data_child))
 
-    def render_names(self, template_name: str, data: TemplateData) -> Iterator[Tuple[str, Any]]:
+    def render_names(self, template_name: str, data: TemplateData) -> Iterator[tuple[str, Any]]:
         """Produce zero or more target names for a given template file name"""
 
         try:

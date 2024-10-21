@@ -1,8 +1,9 @@
 import logging
 import sys
+from collections.abc import Iterable, Mapping
 from itertools import product
 from pathlib import Path
-from typing import Any, Callable, Iterable, Mapping, NamedTuple, Optional
+from typing import Any, Callable, NamedTuple, Optional
 
 import jinja2
 import pytest

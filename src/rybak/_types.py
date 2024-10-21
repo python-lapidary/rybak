@@ -1,4 +1,5 @@
-from typing import Any, Callable, Iterable, Mapping, TypeVar
+from collections.abc import Iterable, Mapping
+from typing import Any, Callable, TypeVar
 
 from .pycompat import TypeAlias
 
