@@ -6,6 +6,7 @@ from typing import Any, Callable, Iterable, Mapping, NamedTuple, Optional
 
 import jinja2
 import pytest
+
 import rybak
 import rybak.jinja
 import rybak.mako

@@ -1,5 +1,6 @@
 import pytest
 from jinja2 import Environment, FileSystemLoader
+
 from rybak.jinja import JinjaAdapter
 
 
