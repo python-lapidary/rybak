@@ -56,6 +56,12 @@ TreeTemplate(
   is the directory containing template files, in this case Jinja templates. Templates can be used in file content, file
   names and directory names.
 
+### Multiple template roots
+
+With Jinja Adapter you can use `ChoiceLoader` with a collection of `FileSystemLoader` and `PackageLoader` instances.
+
+Mako adapter accepts a collection of directories.
+
 ### Single template multiple data
 
 Template files can be applied to collections of items.

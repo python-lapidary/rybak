@@ -78,7 +78,7 @@ e2e_test_data: Iterable[E2eTestData] = [
 
 adapters = {
     'jinja': lambda template_root: rybak.jinja.JinjaAdapter(loader=jinja2.FileSystemLoader(template_root)),
-    'mako': rybak.mako.MakoAdapter,
+    'mako': lambda template_root: rybak.mako.MakoAdapter([template_root]),
 }
 
 exclusions = {

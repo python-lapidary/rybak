@@ -7,8 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Removed
+### Added
+- Support for multiple template roots. Breaking change: MakoAdapter now accepts Iterable[Path]
 
+### Removed
 - Support for python 3.8 .
 
 

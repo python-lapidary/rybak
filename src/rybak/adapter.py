@@ -1,4 +1,5 @@
 import abc
+from collections.abc import Iterable
 
 from ._types import LoopOverFn, TemplateData
 from .pycompat import Traversable
@@ -15,7 +16,7 @@ class RendererAdapter(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def template_root(self) -> Traversable:
+    def template_roots(self) -> Iterable[Traversable]:
         pass
 
 

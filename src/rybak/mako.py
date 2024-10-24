@@ -3,8 +3,9 @@ __all__ = [
 ]
 
 import functools
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Optional
+from typing import Optional, cast
 
 import mako.exceptions  # type: ignore[import-untyped]
 import mako.lookup
@@ -16,8 +17,8 @@ from .pycompat import Traversable
 
 
 class MakoAdapter(RendererAdapter):
-    def __init__(self, template_root: Path) -> None:
-        self._loader = mako.lookup.TemplateLookup((template_root,))
+    def __init__(self, template_roots: Iterable[Path]) -> None:
+        self._loader = mako.lookup.TemplateLookup(list(template_roots))
 
     def render_str(self, template: str, data: TemplateData, loop_over: Optional[LoopOverFn] = None) -> str:
         try:
@@ -34,11 +35,8 @@ class MakoAdapter(RendererAdapter):
             raise RenderError(template_path) from e
 
     @property
-    def template_root(self) -> Traversable:
-        paths = self._loader.directories
-        if len(paths) != 1:
-            raise ValueError('Template root path must be a single path')
-        return Path(paths[0])
+    def template_roots(self) -> Iterable[Traversable]:
+        return [cast(Traversable, Path(directory)) for directory in self._loader.directories]
 
 
 @functools.lru_cache(maxsize=10)

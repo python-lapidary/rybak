@@ -38,6 +38,7 @@ def loop_over(items: Iterable) -> NoReturn:
 class RenderContext:
     """Holds context for rendering a single file or directory"""
 
+    template_root: Traversable
     template_path: PurePath
     target_path: Path
     session: 'Session'
@@ -46,7 +47,11 @@ class RenderContext:
     def with_child(self, template_name: str, target_name: str, data: Optional[TemplateData]) -> 'RenderContext':
         """Create a child context. Pass on the render session."""
         return RenderContext(
-            self.template_path / template_name, self.target_path / target_name, self.session, data or self.data
+            self.template_root,
+            self.template_path / template_name,
+            self.target_path / target_name,
+            self.session,
+            data or self.data,
         )
 
     def _render(self) -> None:
@@ -117,7 +122,7 @@ class RenderContext:
 
     @property
     def full_template_path(self) -> Traversable:
-        return self.session.template.template_root / self.template_path
+        return self.template_root / self.template_path
 
 
 class TreeTemplate:
@@ -148,13 +153,15 @@ class TreeTemplate:
             target_root,
             event_sink,
         )
-        ctx = RenderContext(
-            PurePath(),
-            Path(),
-            session,
-            data,
-        )
-        ctx._render()
+        for template_root in self._adapter.template_roots:
+            ctx = RenderContext(
+                template_root,
+                PurePath(),
+                Path(),
+                session,
+                data,
+            )
+            ctx._render()
 
         # Removing stale files is done at the end since rendered file names can be whole paths, so it's hard to say
         # that a given file will not be rendered or directory will end up empty until all template files has been
@@ -178,10 +185,6 @@ class TreeTemplate:
 
         text = self._adapter.render_file(template_path.as_posix(), data)
         target_path.write_text(text)
-
-    @property
-    def template_root(self) -> PurePath:
-        return self._adapter.template_root
 
 
 @dataclasses.dataclass

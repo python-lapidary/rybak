@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Optional, cast
 
@@ -52,14 +53,18 @@ class JinjaAdapter(RendererAdapter):
             raise RenderError(template_path) from e
 
     @property
-    def template_root(self) -> Traversable:
-        loader = self._env.loader
-        if isinstance(loader, jinja2.FileSystemLoader):
-            path = loader.searchpath
-            if len(path) != 1:
-                raise ValueError('Template root path must be a single path')
-            return Path(path[0])
-        elif isinstance(loader, jinja2.PackageLoader):
-            return cast(Traversable, files(loader.package_name) / loader.package_path)
-        else:
-            raise TypeError(type(loader))
+    def template_roots(self) -> Iterable[Traversable]:
+        yield from _template_roots(self._env.loader)
+
+
+def _template_roots(loader: jinja2.BaseLoader) -> Iterable[Traversable]:
+    if isinstance(loader, jinja2.FileSystemLoader):
+        for path in loader.searchpath:
+            yield Path(path)
+    elif isinstance(loader, jinja2.PackageLoader):
+        yield cast(Traversable, files(loader.package_name) / loader.package_path)
+    elif isinstance(loader, jinja2.ChoiceLoader):
+        for sub_loader in loader.loaders:
+            yield from _template_roots(sub_loader)
+    else:
+        raise TypeError(type(loader))
