@@ -41,8 +41,7 @@ jobs:
         shell: bash
     steps:
     - uses: actions/checkout@v4
-      with:
-        ref: ${{ github.event.release.tag_name }}
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
@@ -61,3 +60,36 @@ jobs:
 
     - name: Run pytest
       run: uv run pytest
+
+  release-draft:
+    name: Draft Release
+    needs: tests
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        enable-cache: true
+
+    - name: Build Project
+      run: uv build
+
+    - name: Create Draft Release
+      env:
+        TAG_NAME: ${{ github.ref_name }}
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh release create "$TAG_NAME" \
+          --repo "$GITHUB_REPOSITORY" \
+          --title "${GITHUB_REPOSITORY#*/} ${TAG_NAME#v}" \
+          --generate-notes \
+          --draft \
+          dist/*.tar.gz dist/*.whl
