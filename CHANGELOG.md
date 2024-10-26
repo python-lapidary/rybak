@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Support for multiple template roots. Breaking change: MakoAdapter now accepts Iterable[Path]
+- Support for multiple template roots. Breaking change: MakoAdapter now accepts `Iterable[Path]`.
+- Raise error when a file is created more than once. Allow adjustment with a callback.
 
 ### Removed
 - Support for python 3.8 .

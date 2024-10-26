@@ -1,12 +1,12 @@
 import logging
-import pathlib
+from pathlib import PurePath
 
 
 class EventSink:
-    def writing_file(self, template: pathlib.PurePath, target: pathlib.Path) -> None:
+    def writing_file(self, template: PurePath, target: PurePath) -> None:
         """Called when TreeRenderer is about to write to a file."""
 
-    def unlinking_file(self, target: pathlib.Path) -> None:
+    def unlinking_file(self, target: PurePath) -> None:
         """Called when TreeRenderer is about to delete a file."""
 
 
@@ -15,8 +15,8 @@ class LoggingEventSink(EventSink):
         self._logger = logger
         self._level = level
 
-    def writing_file(self, template: pathlib.PurePath, target: pathlib.Path) -> None:
+    def writing_file(self, template: PurePath, target: PurePath) -> None:
         self._logger.log(self._level, 'Render from %s to %s', template, target)
 
-    def unlinking_file(self, target: pathlib.Path) -> None:
+    def unlinking_file(self, target: PurePath) -> None:
         self._logger.log(self._level, 'Unlink %s', target)

@@ -25,10 +25,10 @@ def test_callback(tmp_path: pathlib.Path):
     logs: set[tuple[Optional[str], str]] = set()
 
     class ReportingEventSink(rybak.EventSink):
-        def writing_file(self, template: pathlib.PurePath, target: pathlib.Path) -> None:
+        def writing_file(self, template: pathlib.PurePath, target: pathlib.PurePath) -> None:
             logs.add((template.as_posix(), target.as_posix()))
 
-        def unlinking_file(self, target: pathlib.Path) -> None:
+        def unlinking_file(self, target: pathlib.PurePath) -> None:
             logs.add((None, target.as_posix()))
 
     (tmp_path / 'stale_file.txt').write_text('test file')

@@ -6,8 +6,8 @@ from collections.abc import Container, Iterable, Iterator, MutableSet
 from pathlib import Path, PurePath
 from typing import Any, NoReturn, Optional, Union, cast
 
-from ._types import LoopOverFn, TemplateData
-from .adapter import RendererAdapter
+from ._types import ConflictHandler, LoopOverFn, TemplateData
+from .adapter import RendererAdapter, RenderError
 from .events import EventSink
 from .pycompat import Traversable
 
@@ -34,13 +34,17 @@ def loop_over(items: Iterable) -> NoReturn:
     raise StartIteration(items)
 
 
+def _default_conflict_handler(template: PurePath, target: PurePath) -> bool:
+    raise RenderError('Conflicting path', template, target)
+
+
 @dataclasses.dataclass
 class RenderContext:
     """Holds context for rendering a single file or directory"""
 
     template_root: Traversable
     template_path: PurePath
-    target_path: Path
+    target_path: PurePath
     session: 'Session'
     data: TemplateData
 
@@ -54,7 +58,7 @@ class RenderContext:
             data or self.data,
         )
 
-    def _render(self) -> None:
+    def render(self) -> None:
         """Render files and directories in ctx.template_path into ctx.target_path"""
 
         for child in self.full_template_path.iterdir():
@@ -109,9 +113,13 @@ class RenderContext:
         if target_path.exists() and not target_path.is_dir():
             target_path.unlink()
 
-        self._render()
+        self.render()
 
     def _render_file(self) -> None:
+        if self.target_path in self.session.files_written:
+            if not self.session.conflict_handler(self.template_path, self.target_path):
+                logger.debug('Not rendering to file %s due to a conflict.', self.target_path)
+
         logger.debug('Render to file %s', self.target_path)
         self.session.writing_file(self.template_path, self.target_path)
         self.session.template._render_file(self.template_path, self.full_target_path, self.data)
@@ -122,7 +130,7 @@ class RenderContext:
 
     @property
     def full_template_path(self) -> Traversable:
-        return self.template_root / self.template_path
+        return self.template_root / str(self.template_path)
 
 
 class TreeTemplate:
@@ -133,12 +141,14 @@ class TreeTemplate:
         remove_suffixes: Container[str] = (),
         exclude: Union[Iterable[str], Iterable[PurePath]] = ('__pycache__',),
         exclude_extend: Union[Iterable[str], Iterable[PurePath]] = (),
+        on_conflict: ConflictHandler = _default_conflict_handler,
     ) -> None:
         self._adapter = adapter
         self._remove_suffixes = remove_suffixes
         self._exclude = [
             PurePath(cast(Union[str, PurePath], path)) for path in itertools.chain(exclude, exclude_extend)
         ]
+        self._on_conflict = on_conflict
 
     def render(
         self,
@@ -148,20 +158,16 @@ class TreeTemplate:
         event_sink: EventSink = _noop_event_sink,
         remove_stale: bool = False,
     ) -> None:
-        session = Session(
-            self,
-            target_root,
-            event_sink,
-        )
+        session = Session(self, target_root, event_sink, self._on_conflict)
         for template_root in self._adapter.template_roots:
             ctx = RenderContext(
                 template_root,
                 PurePath(),
-                Path(),
+                PurePath(),
                 session,
                 data,
             )
-            ctx._render()
+            ctx.render()
 
         # Removing stale files is done at the end since rendered file names can be whole paths, so it's hard to say
         # that a given file will not be rendered or directory will end up empty until all template files has been
@@ -192,18 +198,19 @@ class Session:
     template: 'TreeTemplate'
     target_root: Path
     event_sink: EventSink
-    _files_written: MutableSet[Path] = dataclasses.field(default_factory=set)
+    conflict_handler: ConflictHandler
+    files_written: MutableSet[PurePath] = dataclasses.field(default_factory=set)
 
     def remove_stale(self) -> None:
         for path_, dirs, files in os.walk(self.target_root, False):
             path = Path(path_)
-            existing_dir_path = path.relative_to(self.target_root)
+            existing_dir_path = PurePath(path.relative_to(self.target_root))
             removed_files: MutableSet[str] = set()
 
             for file_name in files:
                 file_path = existing_dir_path / file_name
 
-                if file_path not in self._files_written:
+                if file_path not in self.files_written:
                     self.event_sink.unlinking_file(file_path)
                     removed_files.add(file_name)
                     (self.target_root / file_path).unlink()
@@ -212,6 +219,6 @@ class Session:
                 self.event_sink.unlinking_file(path)
                 path.rmdir()
 
-    def writing_file(self, template: PurePath, target: Path) -> None:
-        self._files_written.add(target)
+    def writing_file(self, template: PurePath, target: PurePath) -> None:
+        self.files_written.add(target)
         self.event_sink.writing_file(template, target)

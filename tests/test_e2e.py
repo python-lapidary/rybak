@@ -22,6 +22,7 @@ class E2eTestData(NamedTuple):
     test_name: str
     data: Mapping[str, Any]
     error: Optional[bool] = False
+    template_params: Optional[dict[str, Any]] = None
 
 
 e2e_test_data: Iterable[E2eTestData] = [
@@ -48,6 +49,22 @@ e2e_test_data: Iterable[E2eTestData] = [
                 '': 'is silent',
             }
         ),
+    ),
+    E2eTestData(
+        'conflict',
+        dict(
+            one='value',
+            two='value',
+        ),
+        error=True,
+    ),
+    E2eTestData(
+        'conflict',
+        dict(
+            one='value',
+            two='value',
+        ),
+        template_params={'on_conflict': lambda _, _1: True},
     ),
     E2eTestData(
         'loop_nested',
@@ -91,13 +108,14 @@ adapter_test_data = [
 ]
 
 
-@pytest.mark.parametrize('adapter_name,adapter,test_name,data,error,exclude', adapter_test_data)
+@pytest.mark.parametrize('adapter_name,adapter,test_name,data,error,template_params,exclude', adapter_test_data)
 def test_render(
     adapter_name: str,
     adapter: Callable[[Path], rybak.adapter.RendererAdapter],
     test_name: str,
     data: Mapping,
     error: bool,
+    template_params: Optional[dict[str, Any]],
     exclude: Iterable[str],
     tmp_path: Path,
 ) -> None:
@@ -113,6 +131,7 @@ def test_render(
             adapter(root / 'templates' / adapter_name / test_name),
             exclude_extend=exclude,
             remove_suffixes=['.jinja', '.mako'],
+            **(template_params or {}),
         ).render(
             data,
             target_path,
