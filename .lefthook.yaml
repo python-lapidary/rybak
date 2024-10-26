@@ -1,0 +1,9 @@
+pre-commit:
+  parallel: true
+  commands:
+    ruff-check:
+      run: uvx ruff check --fix
+    ruff-format:
+      run: uvx ruff format
+    mypy:
+      run: uvx mypy --ignore-missing-imports src tests
